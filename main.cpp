@@ -20,7 +20,7 @@ int main(void) {
             tks.pop();
         }
         cout << line << endl;
-        cout << parse(line) << endl;
+        cout << parse(dbg) << endl;
     }
     return 0;
 }

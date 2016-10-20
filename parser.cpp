@@ -1,16 +1,21 @@
 #include "parser.h"
 
+#include <iostream>
+
 using namespace std;
 
-string parse(stack<STToken> tokens) {
-    return to_st(tokens);
+string parse(queue<STToken> tokens) {
+    STExecScope sc = to_scope(tokens);
+    for (int i = 0; i < sc.vals.size(); i++) {
+        cout << "Val " << sc.vals[i].val << " (" << sc.vals[i].obj << endl;
+    }
+    return "";
 }
 
-void add_node(stack<STNode> &nodes) {
-    STNode right = nodes.front();
-    tokens.pop();
-    STNode left = nodes.front();
-    tokens.pop();
+void add_node(vector<STNode> &nodes, string op) {
+    int right = nodes.size() - 1;
+    int left = nodes.size() - 2;
+    nodes.push_back({ op, { left, STLeafRef::Node }, { right, STLeafRef::Node } });
 }
 
 int record_token(STToken token, STExecScope &sc) {
@@ -28,11 +33,50 @@ int record_token(STToken token, STExecScope &sc) {
     return sc.vals.size() - 1;
 }
 
-STExecScope to_scope(stack<STToken> tokens) {
+STExecScope to_scope(queue<STToken> tokens) {
     STExecScope sc;
-    stack<OP> operators;
+    stack<STOperator> operators;
     string expr;
-   
+
+    while (!tokens.empty()) {
+        STToken tk = tokens.front(); tokens.pop();
+        if (tk.type == STTokenType::Operator) {
+            STOperator op = ST_OPS[atoi(tk.val.c_str())];
+            if (operators.empty()) {
+                operators.push(op);
+            } else {
+                if (op.val == ")") {
+                    while (operators.top().val != "(") {
+                        add_node(sc.nodes, operators.top().val);
+                        operators.pop();
+                    }
+                    operators.pop();
+                } else {
+                    while (!operators.empty() && operators.top().prec > op.prec) {
+                        add_node(sc.nodes, operators.top().val);
+                        operators.pop();
+                    }
+                    operators.push(op);
+                }
+            }
+        } else {
+            int index = record_token(tk, sc);
+            sc.nodes.push_back({ "", { index, STLeafRef::Value }, { 0, STLeafRef::Nil } });
+        }
+    }
+
+    return sc;
+}
+
+
+
+                    
+
+
+
+            
+
+/*
     for (int i = 0; i < raw.length(); i++) {
         int op_i = op_index(raw, i);
         if (op_i != -1) {
@@ -61,4 +105,4 @@ STExecScope to_scope(stack<STToken> tokens) {
     }
     return expr;
 }
-
+*/

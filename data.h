@@ -36,30 +36,31 @@ struct STToken {
     STTokenType type;
 };
 
-enum SRLeafRef {
-    Reference,
+enum STLeafRef {
+    Const,
     Value,
-    Node
+    Node,
+    Nil
 };
 
 struct STLeaf {
-    STLeafRef type;
     int ref;
+    STLeafRef type;
 };
 
 struct STNode {
-    int op;
+    std::string op;
     STLeaf left;
     STLeaf right;
 };
 
-struct Value {
+struct STValue {
     std::string val;
     std::string obj;
 };
 
 struct STExecScope {
-    std::vector<Value> vals;
+    std::vector<STValue> vals;
     std::vector<STNode> nodes;
     std::vector<std::string> refs;
 };
