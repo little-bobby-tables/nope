@@ -7,7 +7,19 @@ using namespace std;
 string parse(queue<STToken> tokens) {
     STExecScope sc = to_scope(tokens);
     for (int i = 0; i < sc.vals.size(); i++) {
-        cout << "Val " << sc.vals[i].val << " (" << sc.vals[i].obj << endl;
+        cout << "Val " << sc.vals[i].val << " (" << sc.vals[i].obj << ")" <<  endl;
+    }
+    for (int i = 0; i < sc.nodes.size(); i++) {
+        cout << "Node " << sc.nodes[i].op << " ";
+        cout << "(left: " << sc.nodes[i].left.ref;
+        if (sc.nodes[i].left.type == STLeafRef::Value) {
+            cout << " Value)";
+        } else {
+            cout << " Node)";
+        }
+        cout << "(right: " << sc.nodes[i].right.ref;
+        if (sc.nodes[i].right.type == STLeafRef::Value) {                cout << " Value)";                                     } else {                                                        cout << " Node)";                                       }
+        cout << endl;
     }
     return "";
 }
@@ -16,6 +28,7 @@ void add_node(vector<STNode> &nodes, string op) {
     int right = nodes.size() - 1;
     int left = nodes.size() - 2;
     nodes.push_back({ op, { left, STLeafRef::Node }, { right, STLeafRef::Node } });
+    cout << "Creating node with " << op << endl;
 }
 
 int record_token(STToken token, STExecScope &sc) {
@@ -63,6 +76,10 @@ STExecScope to_scope(queue<STToken> tokens) {
             int index = record_token(tk, sc);
             sc.nodes.push_back({ "", { index, STLeafRef::Value }, { 0, STLeafRef::Nil } });
         }
+    }
+    while (!operators.empty()) {
+        add_node(sc.nodes, operators.top().val);
+        operators.pop();
     }
 
     return sc;
