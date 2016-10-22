@@ -37,7 +37,6 @@ struct STToken {
 };
 
 enum STLeafRef {
-    Const,
     Value,
     Node,
     Nil

@@ -24,10 +24,23 @@ string parse(queue<STToken> tokens) {
     return "";
 }
 
-void add_node(vector<STNode> &nodes, string op) {
-    int right = nodes.size() - 1;
-    int left = nodes.size() - 2;
-    nodes.push_back({ op, { left, STLeafRef::Node }, { right, STLeafRef::Node } });
+void add_node(vector<STNode> &nodes, stack<int> &operands, string op) {
+    int node_i = nodes.size();
+    STLeaf right;
+    if (!operands.empty()) {
+        right = { operands.top(), STLeafRef::Value };
+        operands.pop();
+    } else if (node_i > 0) {
+        node_i -= 1;
+        right = { node_i, STLeafRef::Node };
+    }
+    STLeaf left;
+    if (!operands.empty()) {                                               left = { operands.top(), STLeafRef::Value };                       operands.pop();                                                } else if (node_i > 0) {
+        node_i -= 1;
+        left = { node_i, STLeafRef::Node }; 
+    }
+    
+    nodes.push_back({ op, left, right });
     cout << "Creating node with " << op << endl;
 }
 
@@ -49,7 +62,7 @@ int record_token(STToken token, STExecScope &sc) {
 STExecScope to_scope(queue<STToken> tokens) {
     STExecScope sc;
     stack<STOperator> operators;
-    string expr;
+    stack<int> operands;
 
     while (!tokens.empty()) {
         STToken tk = tokens.front(); tokens.pop();
@@ -60,13 +73,13 @@ STExecScope to_scope(queue<STToken> tokens) {
             } else {
                 if (op.val == ")") {
                     while (operators.top().val != "(") {
-                        add_node(sc.nodes, operators.top().val);
+                        add_node(sc.nodes, operands, operators.top().val);
                         operators.pop();
                     }
                     operators.pop();
                 } else {
                     while (!operators.empty() && operators.top().prec > op.prec) {
-                        add_node(sc.nodes, operators.top().val);
+                        add_node(sc.nodes, operands, operators.top().val);
                         operators.pop();
                     }
                     operators.push(op);
@@ -74,11 +87,11 @@ STExecScope to_scope(queue<STToken> tokens) {
             }
         } else {
             int index = record_token(tk, sc);
-            sc.nodes.push_back({ "", { index, STLeafRef::Value }, { 0, STLeafRef::Nil } });
+            operands.push(index);
         }
     }
     while (!operators.empty()) {
-        add_node(sc.nodes, operators.top().val);
+        add_node(sc.nodes, operands, operators.top().val);
         operators.pop();
     }
 
