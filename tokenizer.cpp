@@ -5,7 +5,6 @@ using namespace std;
 queue<STToken> tokenize(string raw) {
     queue<STToken> tokens;
     for (int i = 0; i < raw.length(); i++) {
-        std::cout << " raw " << i << " is " << raw.at(i) << std::endl;
         if (isdigit(raw.at(i))) {
             STToken tk = tokenize_numeric(raw, i);
             tokens.push(tk);
@@ -16,7 +15,6 @@ queue<STToken> tokenize(string raw) {
             i += tk.val.length() + 1;
         } else if (raw.at(i) != ' ') {
             int op = op_index(raw, i);
-            std::cout << i << " " << raw.at(i) << " is " << op << std::endl;
             if (op != -1) {
                 STToken tk = { to_str(op), STTokenType::Operator };
                 tokens.push(tk);
