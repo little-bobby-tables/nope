@@ -26,18 +26,24 @@ string parse(queue<STToken> tokens) {
 
 void add_node(vector<STNode> &nodes, stack<int> &operands, string op) {
     int node_i = nodes.size();
-    STLeaf right;
-    if (!operands.empty()) {
-        right = { operands.top(), STLeafRef::Value };
-        operands.pop();
-    } else if (node_i > 0) {
-        node_i -= 1;
-        right = { node_i, STLeafRef::Node };
-    }
     STLeaf left;
-    if (!operands.empty()) {                                               left = { operands.top(), STLeafRef::Value };                       operands.pop();                                                } else if (node_i > 0) {
+    left.ref = -1;
+    STLeaf right;
+    right.ref = -1;
+    if (!operands.empty()) {
+        left = { operands.top(), STLeafRef::Value };
+        operands.pop();
+    }
+    if (!operands.empty()) {
+        right = { left.ref, STLeafRef::Value };     
+        left.ref = operands.top();
+        operands.pop();                                            }
+    if (left.ref == -1 && node_i > 0) {
         node_i -= 1;
-        left = { node_i, STLeafRef::Node }; 
+        left = { node_i, STLeafRef::Node };
+    }
+    if (right.ref == -1 && node_i > 0) {
+        node_i -= 1;                                                   right = { node_i, STLeafRef::Node };
     }
     
     nodes.push_back({ op, left, right });
