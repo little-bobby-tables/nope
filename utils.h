@@ -11,5 +11,9 @@ std::string to_str (T src) {
     return ss.str();
 }
 
+inline int to_i(std::string s) {
+    return atoi(s.c_str());
+}
+
 #endif
 

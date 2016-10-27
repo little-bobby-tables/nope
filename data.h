@@ -11,16 +11,18 @@
 struct STOperator {
     std::string val;
     int prec;
+    bool ltr;
 };
 
 #define ST_OP_COUNT 6
 const STOperator ST_OPS[] = {
-    {"(", 1},
-    {")", 1},
-    {"+", 2},
-    {"-", 2},
-    {"*", 3},
-    {"/", 3}
+    { "(", 1, true },
+    { ")", 1, true },
+    { "+", 2, true },
+    { "-", 2, true },
+    { "*", 3, true },
+    { "/", 3, true },
+    { "!", 4, false }
 };
 
 enum STTokenType {
@@ -38,8 +40,7 @@ struct STToken {
 
 enum STLeafRef {
     Value,
-    Node,
-    Nil
+    Node
 };
 
 struct STLeaf {
@@ -53,15 +54,27 @@ struct STNode {
     STLeaf right;
 };
 
-struct STValue {
+struct CValue {
     std::string val;
     std::string obj;
 };
 
+struct CFunction {
+    std::string name;
+    std::string obj;
+    CValue (*body)(CValue, CValue);
+};
+
+struct CPrototype {
+    std::string name;
+    std::string base;
+    std::vector<CFunction> funcs;
+};
+
 struct STExecScope {
-    std::vector<STValue> vals;
+    std::vector<CValue> vals;
     std::vector<STNode> nodes;
-    std::vector<std::string> refs;
+    std::vector<CPrototype> protos;
 };
 
 #endif

@@ -1,4 +1,6 @@
 #include "parser.h"
+#include "e/eval.h"
+#include "c/loader.h"
 
 #include <iostream>
 
@@ -6,6 +8,7 @@ using namespace std;
 
 string parse(queue<STToken> tokens) {
     STExecScope sc = to_scope(tokens);
+    load_protos(sc.protos);
     for (int i = 0; i < sc.vals.size(); i++) {
         cout << "Val " << sc.vals[i].val << " (" << sc.vals[i].obj << ")" <<  endl;
     }
@@ -21,6 +24,8 @@ string parse(queue<STToken> tokens) {
         if (sc.nodes[i].right.type == STLeafRef::Value) {                cout << " Value)";                                     } else {                                                        cout << " Node)";                                       }
         cout << endl;
     }
+    CValue c = eval_ast(sc);
+    cout << endl << "=> " << c.val << "(" << c.obj << ")" << endl;
     return "";
 }
 
@@ -56,7 +61,7 @@ STExecScope to_scope(queue<STToken> tokens) {
     while (!tokens.empty()) {
         STToken tk = tokens.front(); tokens.pop();
         if (tk.type == STTokenType::Operator) {
-            STOperator op = ST_OPS[atoi(tk.val.c_str())];
+            STOperator op = ST_OPS[to_i(tk.val)];
             if (operators.empty()) {
                 operators.push(op);
             } else {
