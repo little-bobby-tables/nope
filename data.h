@@ -40,7 +40,8 @@ struct STToken {
 
 enum STLeafRef {
     Value,
-    Node
+    Node,
+    Empty
 };
 
 struct STLeaf {

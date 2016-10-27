@@ -84,6 +84,9 @@ STExecScope to_scope(queue<STToken> tokens) {
             operands.push({ index, STLeafRef::Value });
         }
     }
+    if (operators.empty()) {
+        sc.nodes.push_back({ "", operands.front(), { 0, STLeafRef::Empty }});
+    }
     while (!operators.empty()) {
         add_node(sc.nodes, operands, operators.top().val);
         operators.pop();
@@ -91,3 +94,4 @@ STExecScope to_scope(queue<STToken> tokens) {
 
     return sc;
 }
+

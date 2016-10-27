@@ -17,11 +17,15 @@ CValue eval_node(STExecScope &sc, STNode node) {
     }
     if (node.right.type == STLeafRef::Value) {
         right = sc.vals[node.right.ref];
-    } else {
+    } else if (node.right.type == STLeafRef::Node) {
         right = eval_node(sc, sc.nodes[node.right.ref]);
+    } else {
+        cout << "short-circuiting" << endl;
+        return left;
     }
     cout << "vals evaluated" << endl;
     CFunction f = find_func(sc, node.op, find_proto(sc, left.obj));
+    if (f.name == "no_method") left.val = node.op;
     return f.body(left, right);
 }
 
@@ -36,12 +40,10 @@ CPrototype find_proto(STExecScope &sc, std::string name) {
 
 CFunction find_func(STExecScope &sc, std::string name, CPrototype proto) {
     for (int i = 0; i < proto.funcs.size(); i++) {
-        cout << "traversed " << proto.funcs[i].name << endl;
         if (proto.funcs[i].name == name) {
             return proto.funcs[i];
         }
     }
-    cout << "did not fund a func" << endl;
     if (proto.base != "") {
         return find_func(sc, name, find_proto(sc, proto.base));
     }
