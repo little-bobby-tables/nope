@@ -6,8 +6,8 @@
 
 using namespace std;
 
-string parse(queue<STToken> tokens) {
-    STExecScope sc = to_scope(tokens);
+string parse(STExecScope &sc, queue<STToken> tokens) {
+    build_scope(sc, tokens);
     load_protos(sc.protos);
     for (int i = 0; i < sc.vals.size(); i++) {
         cout << "Val " << sc.vals[i].val << " (" << sc.vals[i].obj << ")" <<  endl;
@@ -49,12 +49,14 @@ int record_token(STToken token, STExecScope &sc) {
         case STTokenType::String:
             sc.vals.push_back({ token.val, "String" });
             break;
+        case STTokenType::Reference:
+            sc.vals.push_back({ token.val, "Reference" });
+            break;
     }
     return sc.vals.size() - 1;
 }
 
-STExecScope to_scope(queue<STToken> tokens) {
-    STExecScope sc;
+STExecScope build_scope(STExecScope &sc, queue<STToken> tokens) {
     stack<STOperator> operators;
     stack<STLeaf> operands;
 

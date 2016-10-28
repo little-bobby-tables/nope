@@ -4,6 +4,7 @@ using namespace std;
 
 queue<STToken> tokenize(string raw) {
     queue<STToken> tokens;
+    string l_buffer = "";
     for (int i = 0; i < raw.length(); i++) {
         if (isdigit(raw.at(i))) {
             STToken tk = tokenize_numeric(raw, i);
@@ -16,11 +17,22 @@ queue<STToken> tokenize(string raw) {
         } else if (raw.at(i) != ' ') {
             int op = op_index(raw, i);
             if (op != -1) {
+                if (l_buffer.size() > 0) {
+                    STToken tk = { l_buffer, STTokenType::Reference };
+                    tokens.push(tk);
+                    l_buffer = "";
+                }
                 STToken tk = { to_str(op), STTokenType::Operator };
                 tokens.push(tk);
                 i += ST_OPS[op].val.length() - 1;
+            } else {
+                l_buffer.push_back(raw.at(i));
             }
         }
+    }
+    if (l_buffer.size() > 0) {
+         STToken tk = { l_buffer, STTokenType::Reference };
+         tokens.push(tk);                                                             l_buffer = "";
     }
     return tokens;
 }

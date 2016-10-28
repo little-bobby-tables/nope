@@ -14,8 +14,9 @@ struct STOperator {
     bool ltr;
 };
 
-#define ST_OP_COUNT 6
+#define ST_OP_COUNT 8
 const STOperator ST_OPS[] = {
+    { "=", 1, true },
     { "(", 1, true },
     { ")", 1, true },
     { "+", 2, true },
@@ -72,9 +73,15 @@ struct CPrototype {
     std::vector<CFunction> funcs;
 };
 
+struct CProperty {
+    std::string name;
+    CValue val;
+};
+
 struct STExecScope {
     std::vector<CValue> vals;
     std::vector<STNode> nodes;
+    std::vector<CProperty> locals;
     std::vector<CPrototype> protos;
 };
 

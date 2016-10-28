@@ -5,11 +5,14 @@
 using namespace std;
 
 int main(void) {
-    cout << "Ree Interpreter 0.1" << endl;
+    cout << "Nope 0.1" << endl;
 
+    STExecScope sc;
     string line = "";
     while (true) {
-        cout << "ree=> ";
+        sc.nodes.clear();
+        sc.vals.clear();
+        cout << "nope=> ";
         getline(cin, line);
         if (line == "exit") break;
         std::queue<STToken> tks = tokenize(line);
@@ -20,7 +23,7 @@ int main(void) {
             tks.pop();
         }
         cout << line << endl;
-        cout << parse(dbg) << endl;
+        cout << parse(sc, dbg) << endl;
     }
     return 0;
 }
