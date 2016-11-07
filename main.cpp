@@ -1,17 +1,20 @@
 #include <iostream>
 #include "parser.h"
 #include "tokenizer.h"
+#include "evaluator.h"
 
 using namespace std;
 
 int main(void) {
     cout << "Nope 0.1" << endl;
 
-    STExecScope sc;
+    STExecScope *sc = new STExecScope();
+    Evaluator e(sc);
+    Parser p(sc);
+
     string line = "";
     while (true) {
-        sc.nodes.clear();
-        sc.vals.clear();
+        e.clear_scope();
         cout << "nope=> ";
         getline(cin, line);
         if (line == "exit") break;
@@ -23,7 +26,8 @@ int main(void) {
             tks.pop();
         }
         cout << line << endl;
-        cout << parse(sc, dbg) << endl;
+        p.parse_to_scope(dbg);
+        cout << e.eval().val << endl;
     }
     return 0;
 }
