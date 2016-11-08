@@ -1,9 +1,11 @@
 #include "evaluator.h"
+#include "c/loader.h"
 
 using namespace std;
 
 Evaluator::Evaluator(STExecScope *scope) {
     this->sc = scope;
+    load_protos(this->protos);
 }
 
 CValue Evaluator::eval() {
@@ -72,12 +74,12 @@ void Evaluator::set_property(string name, CValue val) {
 }
 
 CPrototype Evaluator::find_proto(string name) {
-    for (int i = 0; i < this->sc->protos.size(); i++) {
-        if (this->sc->protos[i].name == name) {
-            return this->sc->protos[i];
+    for (int i = 0; i < this->protos.size(); i++) {
+        if (this->protos[i].name == name) {
+            return this->protos[i];
         }
     }
-    return this->sc->protos[0];
+    return this->protos[0];
 }
 
 CFunction Evaluator::find_func(string name, CPrototype proto) {
@@ -89,6 +91,6 @@ CFunction Evaluator::find_func(string name, CPrototype proto) {
     if (proto.base != "") {
         return find_func(name, find_proto(proto.base));
     }
-    return find_func("no_method", this->sc->protos[0]);
+    return find_func("no_method", this->protos[0]);
 }
 

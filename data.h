@@ -82,7 +82,6 @@ struct STExecScope {
     std::vector<CValue> vals;
     std::vector<STNode> nodes;
     std::vector<CProperty> locals;
-    std::vector<CPrototype> protos;
 };
 
 #endif

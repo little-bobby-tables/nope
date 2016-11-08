@@ -15,6 +15,7 @@ class Evaluator {
         CPrototype find_proto(std::string name);
         CFunction find_func(std::string name, CPrototype proto);
         STExecScope *sc;
+        std::vector<CPrototype> protos;
 };
 
 #endif
