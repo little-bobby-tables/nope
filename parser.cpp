@@ -21,7 +21,9 @@ void Parser::build_ast(queue<STToken> tokens) {
             if (operators.empty()) {
                 operators.push(op);
             } else {
-                if (op.val == ")") {
+                if (op.val == "(") {
+                    operators.push(op);
+                } else if (op.val == ")") {
                     while (operators.top().val != "(") {
                         add_node(operands, operators.top().val);
                         operators.pop();
