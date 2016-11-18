@@ -3,10 +3,9 @@
     #include "lex.hpp"
 
     #undef  YY_DECL
-    #define YY_DECL int Lang::Lex::yylex( Lang::Parse::semantic_type * const lval, Lang::Parse::location_type *loc )
+    #define YY_DECL Lang::Parse::symbol_type Lang::Lex::yylex(Lang::Parse::semantic_type* const lval, Lang::Parse::location_type *loc)
 
-    using t = Lang::Parse::token;
-
+    #define yyterminate() return Lang::Parse::make_END(*loc)
 %}
 
 %option c++
@@ -21,14 +20,9 @@
     yylval = lval;
 %}
 
-[0-9]+ { 
-    yyval.inum = atoi(yytext);
-    return t::INT;
-}
-
-. {
-    return yytext;
+[0-9]+ {
+  const int val = atoi(yytext);
+  return Lang::Parse::make_INT(val, *loc);
 }
 
 %%
-

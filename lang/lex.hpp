@@ -19,12 +19,12 @@ namespace Lang {
             };
 
              using FlexLexer::yylex;
-             virtual int yylex(Lang::Parse::semantic_type * const lval, Lang::Parse::location_type *location );
+             virtual Lang::Parse::symbol_type yylex(Lang::Parse::semantic_type * const lval, Lang::Parse::location_type *location);
 
          private:
              Lang::Parse::semantic_type *yylval = nullptr;
              Lang::Parse::location_type *loc    = nullptr;
-     }
-}
-#endif
+     };
+};
 
+#endif

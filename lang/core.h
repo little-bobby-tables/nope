@@ -18,6 +18,6 @@ namespace Lang {
             Lang::Parse *parser = nullptr;
             Lang::Lex *lexer = nullptr;
     };
-}
+};
 
 #endif

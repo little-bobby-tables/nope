@@ -1,11 +1,10 @@
 CXX=g++
 DEBUG=-g
 CXXFLAGS=-g -std=c++11
-BIN=nope
-
 SRC=$(wildcard *.cpp)
-LANG=parser.o lexer.o
 OBJ=$(SRC:%.cpp=%.o), $(LANG)
+
+GENERATED=lang/lexer.yy.cc lang/parser.tab.cc lang/parser.tab.hh lang/location.hh lang/position.hh lang/stack.hh lang/parser.output
 
 all: $(OBJ)
 	$(CXX) -o $(BIN) $^
@@ -14,14 +13,14 @@ all: $(OBJ)
 	$(CXX) $@ -c $<
 
 parser: lang/nope.yy
-	bison -d -v lang/nope.yy
-	$(CXX) $(CXXFLAGS) -c -o parser.o parser.tab.cc
+	bison -o lang/parser.tab.cc -d -v lang/nope.yy
+	$(CXX) $(CXXFLAGS) -c -o parser.o lang/parser.tab.cc
 
 lexer: lang/nope.l
-	flex --outfile=lang/nope.yy.cc  $<
-	$(CXX) $(CXXFLAGS) -c nope.yy.cc -o lexer.o
+	flex --outfile=lang/lexer.yy.cc  $<
+	$(CXX) $(CXXFLAGS) -c -o lexer.o lang/lexer.yy.cc
 
 clean:
 	 rm -f *.o
+	 rm $(GENERATED)
 	 rm $(BIN)
-
