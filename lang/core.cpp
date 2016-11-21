@@ -17,11 +17,10 @@ void Lang::Core::parse(std::istream &stream) {
         return;
     } else
         delete lexer;
-        lexer = new Lang::Lex(&stream);
+        lexer = new Lang::Lexer(&stream);
         delete parser;
-        parser = new Lang::Parse(*lexer, *this);                }
+        parser = new Lang::Parser(*lexer, *this);                }
     if (parser->parse() != 0) {
         /* TODO: handle error */
     }
 }
-

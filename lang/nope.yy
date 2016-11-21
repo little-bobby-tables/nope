@@ -3,20 +3,25 @@
 
 %debug
 %defines
+%locations
 %define api.namespace { Lang }
-%define parser_class_name { Parse }
+%define parser_class_name { Parser }
+
+%define api.token.constructor
+%define api.value.type variant
+%define parse.assert
+
+%parse-param { Lexer &lex }
+%parse-param { Core &core }
 
 %code requires {
     #include <string>
 
     namespace Lang {
-        class Lex;
+        class Lexer;
         class Core;
     };
 }
-
-%parse-param { Lex &lex }
-%parse-param { Core &core }
 
 %code {
    #include <iostream>
@@ -24,13 +29,10 @@
 
    #include "core.h"
 
-   #undef yylex
+   #define YY_DECL Lang::Parser::symbol_type Lang::Lexer::yylex(semantic_type* const yylval, location_type *yylloc)
+
    #define yylex lex.yylex
 }
-
-%define api.token.constructor
-%define api.value.type variant
-%define parse.assert
 
 %token <int>           INT
 %token <std::string>   REF
@@ -40,8 +42,6 @@
 
 %left '+' '-'
 %left '*' '/'
-
-%locations
 
 %%
 
@@ -75,6 +75,6 @@ op      : '+'
 
 %%
 
-void Lang::Parse::error(const location_type& l, const std::string& error) {
+void Lang::Parser::error(const location_type& l, const std::string& error) {
    std::cerr << "Error: " << error << " at " << l << std::endl;
 }

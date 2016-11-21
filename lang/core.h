@@ -5,7 +5,7 @@
 #include <cstddef>
 #include <istream>
 
-#include "lex.hpp"
+#include "lexer.hpp"
 #include "parser.tab.hh"
 
 namespace Lang {
@@ -15,8 +15,8 @@ namespace Lang {
             virtual ~Core();
             void parse(std::istream &stream);
         private:
-            Lang::Parse *parser = nullptr;
-            Lang::Lex *lexer = nullptr;
+            Lang::Parser *parser = nullptr;
+            Lang::Lexer *lexer = nullptr;
     };
 };
 

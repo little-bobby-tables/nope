@@ -1,15 +1,14 @@
 %{
     #include <string>
-    #include "lex.hpp"
+    #include "lexer.hpp"
 
-    #undef  YY_DECL
-    #define YY_DECL Lang::Parse::symbol_type Lang::Lex::yylex(Lang::Parse::semantic_type* const lval, Lang::Parse::location_type *loc)
+    #define YY_DECL Lang::Parser::symbol_type Lang::Lexer::yylex(Lang::Parser::semantic_type* const lval, Lang::Parser::location_type *loc)
 
-    #define yyterminate() return Lang::Parse::make_END(*loc)
+    #define yyterminate() return Lang::Parser::make_END(*loc)
 %}
 
 %option c++
-%option yyclass="Lang::Lex"
+%option yyclass="Lang::Lexer"
 %option nodefault
 %option noyywrap
 %option debug
@@ -17,12 +16,12 @@
 %%
 
 %{
-    yylval = lval;
+    yylloc->step();
 %}
 
 [0-9]+ {
-  const int val = atoi(yytext);
-  return Lang::Parse::make_INT(val, *loc);
+    const int val = atoi(yytext);
+    return Lang::Parser::make_INT(val, *loc);
 }
 
 %%
