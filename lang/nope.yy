@@ -1,9 +1,8 @@
 %skeleton "lalr1.cc"
 %require "3.0.4"
 
-%debug
 %defines
-%locations
+%debug
 %define api.namespace { Lang }
 %define parser_class_name { Parser }
 
@@ -11,7 +10,7 @@
 %define api.value.type variant
 %define parse.assert
 
-%parse-param { Lexer &lex }
+%parse-param { Lexer &lexer }
 %parse-param { Core &core }
 
 %code requires {
@@ -23,15 +22,15 @@
     };
 }
 
-%code {
-   #include <iostream>
-   #include <cstdlib>
+%locations
 
-   #include "core.h"
+%code top {
+    #include <iostream>
+    #include <cstdlib>
 
-   #define YY_DECL Lang::Parser::symbol_type Lang::Lexer::yylex(semantic_type* const yylval, location_type *yylloc)
+    #include "core.h"
 
-   #define yylex lex.yylex
+    #define yylex lexer.LEXER_YYLEX
 }
 
 %token <int>           INT

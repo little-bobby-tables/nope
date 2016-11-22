@@ -8,6 +8,12 @@
 #include "parser.tab.hh"
 #include "location.hh"
 
+/* It's impossible to override the return type of yylex (int) so we have
+ * to use a different method there. */
+#define YY_DECL Lang::Parser::symbol_type Lang::Flex::yylex_sym()
+/* Use this macro to call yylex from the parser */
+#define LEXER_YYLEX yylex_sym
+
 namespace Lang {
     class Lexer : public yyFlexLexer {
         public:
@@ -18,7 +24,7 @@ namespace Lang {
                 delete yylloc;
             };
 
-            virtual Lang::Parser::symbol_type yylex(Lang::Parser::semantic_type* const yylval, Lang::Parser::location_type *yylloc);
+            virtual Lang::Parser::symbol_type yylex_sym();
 
          private:
            Lang::Parser::semantic_type *yylval = nullptr;
