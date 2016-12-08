@@ -2,12 +2,12 @@
 #include <fstream>
 #include <cassert>
 
-#include "mc_driver.hpp"
+#include "core.h"
 
 Lang::Core::~Core()
 {
     delete lexer;
-    scanner = nullptr;
+    lexer = nullptr;
     delete parser;
     parser = nullptr;
 }
@@ -15,11 +15,12 @@ Lang::Core::~Core()
 void Lang::Core::parse(std::istream &stream) {
     if (!stream.good() && stream.eof()) {
         return;
-    } else
+    } else {
         delete lexer;
         lexer = new Lang::Lexer(&stream);
         delete parser;
-        parser = new Lang::Parser(*lexer, *this);                }
+        parser = new Lang::Parser(*lexer, *this);
+    }
     if (parser->parse() != 0) {
         /* TODO: handle error */
     }

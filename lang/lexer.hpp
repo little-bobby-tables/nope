@@ -10,7 +10,7 @@
 
 /* It's impossible to override the return type of yylex (int) so we have
  * to use a different method there. */
-#define YY_DECL Lang::Parser::symbol_type Lang::Flex::yylex_sym()
+#define YY_DECL Lang::Parser::symbol_type Lang::Lexer::yylex_sym()
 /* Use this macro to call yylex from the parser */
 #define LEXER_YYLEX yylex_sym
 

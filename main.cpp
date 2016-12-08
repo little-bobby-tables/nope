@@ -17,7 +17,7 @@ int main(void) {
         getline(cin, line);
 
         if (line == "exit") break;
-        std::istringstream is(mystring); /* TODO: dirty! */
+        std::istringstream is(line); /* TODO: dirty! */
         c.parse(is);
     }
 
