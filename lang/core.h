@@ -13,6 +13,7 @@ namespace Lang {
         public:
             Core() = default;
             virtual ~Core();
+            void parsing_finished(std::string program);
             void parse(std::istream &stream);
         private:
             Lang::Parser *parser = nullptr;

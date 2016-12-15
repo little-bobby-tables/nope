@@ -12,6 +12,10 @@ Lang::Core::~Core()
     parser = nullptr;
 }
 
+void Lang::Core::parsing_finished(std::string program) {
+    std::cout << "Received parsed result " << program << std::endl;
+}
+
 void Lang::Core::parse(std::istream &stream) {
     if (!stream.good() && stream.eof()) {
         return;
