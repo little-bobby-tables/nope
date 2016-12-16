@@ -128,6 +128,7 @@
 "/" return Lang::Parser::make_Division(*yylloc);
 "(" return Lang::Parser::make_LeftParenthesis(*yylloc);
 ")" return Lang::Parser::make_RightParenthesis(*yylloc);
+"," return Lang::Parser::make_Comma(*yylloc);
 
 [ ] { }
 

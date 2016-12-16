@@ -41,11 +41,12 @@
 %token <std::string>   Reference
 
 %token Assignment Addition Subtraction Multiplication Division
-%token LeftParenthesis RightParenthesis
+%token LeftParenthesis RightParenthesis Comma
 %token Do If Then Else
 
 %type <std::string>    expressions
 %type <std::string>    expression infix_expression
+%type <std::string>    function_call function_call_args
 %type <std::string>    assignment
 %type <std::string>    if_statement
 %type <std::string>    block
@@ -85,6 +86,9 @@ expression
     | if_statement {
         $$ = $1;
     }
+    | function_call {
+        $$ = $1;
+    }
     | value {
         $$ = $1;
     }
@@ -96,6 +100,21 @@ expression
 assignment
     : Reference Assignment expression {
         $$ = "(asgn " + $1 + " = " + $3 + ")";
+    }
+    ;
+
+function_call
+    : Reference LeftParenthesis function_call_args RightParenthesis {
+        $$ = "(fcall " + $1 + " with args " + $3 + ")";
+    }
+    ;
+
+function_call_args
+    : function_call_args Comma expression {
+        $$ = $1 + $3;
+    }
+    | expression {
+        $$ = $1;
     }
     ;
 
@@ -111,6 +130,18 @@ if_statement
     }
     | If expression Then block {
         $$ = "(if " + $2 + " then " + $4 + ")";
+    }
+    | If expression Then expression Else expression {
+        $$ = "(if " + $2 + " then " + $4 + " else " + $6 + ")";
+    }
+    | If expression Then expression Else block {
+        $$ = "(if " + $2 + " then " + $4 + " else " + $6 + ")";
+    }
+    | If expression Then block terminator Else expression {
+        $$ = "(if " + $2 + " then " + $4 + " else " + $7 + ")";
+    }
+    | If expression Then block terminator Else block {
+        $$ = "(if " + $2 + " then " + $4 + " else " + $7 + ")";
     }
     ;
 
