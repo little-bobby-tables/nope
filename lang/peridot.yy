@@ -34,22 +34,15 @@
     #define yylex lexer.LEXER_YYLEX
 }
 
-%token END 0    "end of input"
-%token INDENT   "indentation"
-%token UNINDENT "unindentation"
-%token NEWLINE  "new line"
+%token EndOfInput 0
+%token Indentation Unindentation Newline
 
-%token <int>           INT
-%token <std::string>   REF
+%token <int>           Integer
+%token <std::string>   Reference
 
-%token ASSIGN "="
-%token PLUS   "+"
-%token MINUS  "-"
-%token STAR   "*"
-%token SLASH  "/"
-%token LPAR   "("
-%token RPAR   ")"
-%token K_DO K_IF K_THEN K_ELSE
+%token Assignment Addition Subtraction Multiplication Division
+%token LeftParenthesis RightParenthesis
+%token Do If Then Else
 
 %type <std::string>    expressions
 %type <std::string>    expression infix_expression
@@ -58,10 +51,10 @@
 %type <std::string>    block
 %type <std::string>    value
 
-%nonassoc LPAR RPAR
-%left ASSIGN
-%left PLUS MINUS
-%left STAR SLASH
+%nonassoc LeftParenthesis RightParenthesis
+%left Assignment
+%left Addition Subtraction
+%left Multiplication Division
 
 %start program
 
@@ -95,58 +88,58 @@ expression
     | value {
         $$ = $1;
     }
-    | REF {
+    | Reference {
         $$ = "(ref " + $1 + ")";
     }
     ;
 
 assignment
-    : REF ASSIGN expression {
+    : Reference Assignment expression {
         $$ = "(asgn " + $1 + " = " + $3 + ")";
     }
     ;
 
 block
-    : terminator INDENT expressions UNINDENT {
+    : terminator Indentation expressions Unindentation {
         $$ = "(block " + $3 + ")";
     }
     ;
 
 if_statement
-    : K_IF expression K_THEN expression {
+    : If expression Then expression {
         $$ = "(if " + $2 + " then " + $4 + ")";
     }
-    | K_IF expression K_THEN block {
+    | If expression Then block {
         $$ = "(if " + $2 + " then " + $4 + ")";
     }
     ;
 
 infix_expression
-    : LPAR expression RPAR {
+    : LeftParenthesis expression RightParenthesis {
         $$ = "(expr " + $2 + ")";
     }
-    | expression PLUS expression {
+    | expression Addition expression {
         $$ = "(expr " + $1 + " + " + $3 + ")";
     }
-    | expression MINUS expression {
+    | expression Subtraction expression {
         $$ = "(expr " + $1 + " - " + $3 + ")";
     }
-    | expression STAR expression {
+    | expression Multiplication expression {
         $$ = "(expr " + $1 + " * " + $3 + ")";
     }
-    | expression SLASH expression {
+    | expression Division expression {
         $$ = "(expr " + $1 + " / " + $3 + ")";
     }
 
 value
-    : INT {
+    : Integer {
         $$ = "(int " + std::to_string($1) + ")";
     }
     ;
 
 terminator
-    : NEWLINE
-    | END
+    : Newline
+    | EndOfInput
     ;
 
 %%

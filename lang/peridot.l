@@ -7,7 +7,7 @@
     int current_line_indent_lvl = 0;
     bool unindenting_multiple_lvls = false;
 
-    #define yyterminate() return Lang::Parser::make_END(*yylloc)
+    #define yyterminate() return Lang::Parser::make_EndOfInput(*yylloc)
 
     #define YY_USER_INIT { indent_lvls.push(0); BEGIN(initial_line_indent); }
     #define YY_USER_ACTION { yylloc->columns(yyleng); }
@@ -56,7 +56,7 @@
             } else {
                 BEGIN(next_mode);
             }
-            return Lang::Parser::make_UNINDENT(*yylloc);
+            return Lang::Parser::make_Unindentation(*yylloc);
         } else {
             yyterminate();
         }
@@ -68,7 +68,7 @@
     if (current_line_indent_lvl > indent_lvls.top()) {
         indent_lvls.push(current_line_indent_lvl);
         BEGIN(next_mode);
-        return Lang::Parser::make_INDENT(*yylloc);
+        return Lang::Parser::make_Indentation(*yylloc);
     } else if (current_line_indent_lvl < indent_lvls.top()) {
         indent_lvls.pop();
         if (current_line_indent_lvl != indent_lvls.top()) {
@@ -88,12 +88,12 @@
         } else {
             BEGIN(next_mode);
         }
-        /* By design, unindent is expected to be followed by the NEWLINE token */
+        /* By design, unindentation is expected to be followed by the Newline token */
         for (int i = 0; i < indent_lvls.top(); i++) {
             unput(' '); unput(' ');
         }
         unput('\n');
-        return Lang::Parser::make_UNINDENT(*yylloc);
+        return Lang::Parser::make_Unindentation(*yylloc);
     } else {
         /* Indentation unchanged */
         BEGIN(next_mode);
@@ -104,30 +104,30 @@
     current_line_indent_lvl = 0;
     next_mode = YY_START;
     BEGIN(line_indent);
-    return Lang::Parser::make_NEWLINE(*yylloc);
+    return Lang::Parser::make_Newline(*yylloc);
 }
 
-"if"   return Lang::Parser::make_K_IF(*yylloc);
-"then" return Lang::Parser::make_K_THEN(*yylloc);
-"else" return Lang::Parser::make_K_ELSE(*yylloc);
-"do"   return Lang::Parser::make_K_DO(*yylloc);
+"if"   return Lang::Parser::make_If(*yylloc);
+"then" return Lang::Parser::make_Then(*yylloc);
+"else" return Lang::Parser::make_Else(*yylloc);
+"do"   return Lang::Parser::make_Do(*yylloc);
 
 [0-9]+ {
     const int val = atoi(yytext);
-    return Lang::Parser::make_INT(val, *yylloc);
+    return Lang::Parser::make_Integer(val, *yylloc);
 }
 
 [a-z][A-Za-z0-9_]* {
-    return Lang::Parser::make_REF(yytext, *yylloc);
+    return Lang::Parser::make_Reference(yytext, *yylloc);
 }
 
-"=" return Lang::Parser::make_ASSIGN(*yylloc);
-"+" return Lang::Parser::make_PLUS(*yylloc);
-"-" return Lang::Parser::make_MINUS(*yylloc);
-"*" return Lang::Parser::make_STAR(*yylloc);
-"/" return Lang::Parser::make_SLASH(*yylloc);
-"(" return Lang::Parser::make_LPAR(*yylloc);
-")" return Lang::Parser::make_RPAR(*yylloc);
+"=" return Lang::Parser::make_Assignment(*yylloc);
+"+" return Lang::Parser::make_Addition(*yylloc);
+"-" return Lang::Parser::make_Subtraction(*yylloc);
+"*" return Lang::Parser::make_Multiplication(*yylloc);
+"/" return Lang::Parser::make_Division(*yylloc);
+"(" return Lang::Parser::make_LeftParenthesis(*yylloc);
+")" return Lang::Parser::make_RightParenthesis(*yylloc);
 
 [ ] { }
 
