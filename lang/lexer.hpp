@@ -5,6 +5,8 @@
 #include <FlexLexer.h>
 #endif
 
+#include <stack>
+
 #include "parser.tab.hh"
 #include "location.hh"
 
@@ -26,9 +28,9 @@ namespace Lang {
 
             virtual Lang::Parser::symbol_type yylex_sym();
 
-         private:
-           Lang::Parser::semantic_type *yylval = nullptr;
-           Lang::Parser::location_type *yylloc = nullptr;
+        private:
+            Lang::Parser::semantic_type *yylval = nullptr;
+            Lang::Parser::location_type *yylloc = nullptr;
      };
 };
 

@@ -39,11 +39,16 @@
 %token <int>           INT
 %token <std::string>   REF
 
+%token INDENT DEDENT
+
 %token B_START B_END END
 %token ASSIGN PLUS MINUS STAR SLASH LPAR RPAR
+%token K_DO K_IF K_THEN K_ELSE
 
 %type <std::string>    asgn
 %type <std::string>    stmts
+%type <std::string>    if_stmt
+%type <std::string>    block
 %type <std::string>    stmt
 %type <std::string>    expr
 %type <std::string>    op
@@ -62,33 +67,40 @@ program : stmts {
         ;
 
 stmts   : stmt { $$ = $1; }
-        | stmts stmt
-        | stmts block
+        | stmts stmt { $$ = $1 + $2; }
         ;
 
-block   : B_START stmts B_END
+block   : INDENT stmts DEDENT {
+            $$ = "(block " + $2 + ")";
+        }
         ;
 
 stmt    : asgn { $$ = $1; }
         | expr { $$ = $1; }
+        | if_stmt { $$ = $1; }
         ;
 
 expr    : REF {
-            std::cout << "Ref " << $1 << std::endl;
-            $$ = $1;
+            $$ = "(ref " + $1 + ")";
         }
         | INT {
-            std::cout << "Int " << $1 << std::endl;
-            $$ = std::to_string($1);
+            $$ = "(int " + std::to_string($1) + ")";
         }
         | expr op expr {
-            std::cout << "Expr " << $1 << $2 << $3 << std::endl;
-            $$ = $1 + $2 + $3;
+            $$ = "(expr " + $1 + " " + $2 + " " + $3 + ")";
         }
         ;
 
 asgn    : REF ASSIGN expr {
             std::cout << "assigning " << $3 << " to " << $1 << std::endl;
+        }
+        ;
+
+if_stmt : K_IF stmt K_THEN stmt {
+            $$ = "(if with stmt " + $4 + " and condition " + $2 + ")";
+        }
+        | K_IF stmt K_THEN block { 
+            $$ = "(if with block " + $4 + " and condition " + $2 + ")";
         }
         ;
 

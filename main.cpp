@@ -11,10 +11,16 @@ int main(void) {
     cout << "Nope 0.1" << endl;
 
     Lang::Core c;
-    string line = "";
     while (true) {
-        cout << "nope=> ";
-        getline(cin, line);
+        string line = "", buf = "";
+        cout << "nope=> " << endl;
+        while (!cin.eof()) {
+            string buf;
+            getline(cin, buf);
+            if (!line.empty()) line += "\n";
+            line += buf;
+        }
+        cin.clear();
 
         if (line == "exit") break;
         std::istringstream is(line); /* TODO: dirty! */
