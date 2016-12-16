@@ -42,19 +42,26 @@
 %token <int>           INT
 %token <std::string>   REF
 
-%token ASSIGN PLUS MINUS STAR SLASH LPAR RPAR
+%token ASSIGN "="
+%token PLUS   "+"
+%token MINUS  "-"
+%token STAR   "*"
+%token SLASH  "/"
+%token LPAR   "("
+%token RPAR   ")"
 %token K_DO K_IF K_THEN K_ELSE
 
 %type <std::string>    expressions
-%type <std::string>    expression
+%type <std::string>    expression infix_expression
 %type <std::string>    assignment
 %type <std::string>    if_statement
 %type <std::string>    block
 %type <std::string>    value
-%type <std::string>    op
 
-%left '+' '-'
-%left '*' '/'
+%nonassoc LPAR RPAR
+%left ASSIGN
+%left PLUS MINUS
+%left STAR SLASH
 
 %start program
 
@@ -79,8 +86,8 @@ expression
     : assignment {
         $$ = $1;
     }
-    | expression op expression {
-        $$ = "(expr " + $1 + " " + $2 + " " + $3 + ")";
+    | infix_expression {
+        $$ = $1;
     }
     | if_statement {
         $$ = $1;
@@ -114,17 +121,27 @@ if_statement
     }
     ;
 
+infix_expression
+    : LPAR expression RPAR {
+        $$ = "(expr " + $2 + ")";
+    }
+    | expression PLUS expression {
+        $$ = "(expr " + $1 + " + " + $3 + ")";
+    }
+    | expression MINUS expression {
+        $$ = "(expr " + $1 + " - " + $3 + ")";
+    }
+    | expression STAR expression {
+        $$ = "(expr " + $1 + " * " + $3 + ")";
+    }
+    | expression SLASH expression {
+        $$ = "(expr " + $1 + " / " + $3 + ")";
+    }
+
 value
     : INT {
         $$ = "(int " + std::to_string($1) + ")";
     }
-    ;
-
-op
-    : PLUS { $$ = "+"; }
-    | MINUS { $$ = "-"; }
-    | STAR { $$ = "*"; }
-    | SLASH { $$ = "/"; }
     ;
 
 terminator
