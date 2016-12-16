@@ -34,23 +34,23 @@
     #define yylex lexer.LEXER_YYLEX
 }
 
-%token END 0 "end of input"
+%token END 0    "end of input"
+%token INDENT   "indentation"
+%token UNINDENT "unindentation"
+%token NEWLINE  "new line"
 
 %token <int>           INT
 %token <std::string>   REF
 
-%token INDENT DEDENT
-
-%token B_START B_END END
 %token ASSIGN PLUS MINUS STAR SLASH LPAR RPAR
 %token K_DO K_IF K_THEN K_ELSE
 
-%type <std::string>    asgn
-%type <std::string>    stmts
-%type <std::string>    if_stmt
+%type <std::string>    expressions
+%type <std::string>    expression
+%type <std::string>    assignment
+%type <std::string>    if_statement
 %type <std::string>    block
-%type <std::string>    stmt
-%type <std::string>    expr
+%type <std::string>    value
 %type <std::string>    op
 
 %left '+' '-'
@@ -60,55 +60,77 @@
 
 %%
 
-program : stmts {
-            std::cout << $1 << std::endl; 
-            core.parsing_finished($1);
-        }
-        ;
+program
+    : expressions {
+        core.parsing_finished($1);
+    }
+    ;
 
-stmts   : stmt { $$ = $1; }
-        | stmts stmt { $$ = $1 + $2; }
-        ;
+expressions
+    : expression terminator {
+        $$ = $1;
+    }
+    | expressions expression terminator {
+        $$ = $1 + $2;
+    }
+    ;
 
-block   : INDENT stmts DEDENT {
-            $$ = "(block " + $2 + ")";
-        }
-        ;
+expression
+    : assignment {
+        $$ = $1;
+    }
+    | expression op expression {
+        $$ = "(expr " + $1 + " " + $2 + " " + $3 + ")";
+    }
+    | if_statement {
+        $$ = $1;
+    }
+    | value {
+        $$ = $1;
+    }
+    | REF {
+        $$ = "(ref " + $1 + ")";
+    }
+    ;
 
-stmt    : asgn { $$ = $1; }
-        | expr { $$ = $1; }
-        | if_stmt { $$ = $1; }
-        ;
+assignment
+    : REF ASSIGN expression {
+        $$ = "(asgn " + $1 + " = " + $3 + ")";
+    }
+    ;
 
-expr    : REF {
-            $$ = "(ref " + $1 + ")";
-        }
-        | INT {
-            $$ = "(int " + std::to_string($1) + ")";
-        }
-        | expr op expr {
-            $$ = "(expr " + $1 + " " + $2 + " " + $3 + ")";
-        }
-        ;
+block
+    : terminator INDENT expressions UNINDENT {
+        $$ = "(block " + $3 + ")";
+    }
+    ;
 
-asgn    : REF ASSIGN expr {
-            std::cout << "assigning " << $3 << " to " << $1 << std::endl;
-        }
-        ;
+if_statement
+    : K_IF expression K_THEN expression {
+        $$ = "(if " + $2 + " then " + $4 + ")";
+    }
+    | K_IF expression K_THEN block {
+        $$ = "(if " + $2 + " then " + $4 + ")";
+    }
+    ;
 
-if_stmt : K_IF stmt K_THEN stmt {
-            $$ = "(if with stmt " + $4 + " and condition " + $2 + ")";
-        }
-        | K_IF stmt K_THEN block { 
-            $$ = "(if with block " + $4 + " and condition " + $2 + ")";
-        }
-        ;
+value
+    : INT {
+        $$ = "(int " + std::to_string($1) + ")";
+    }
+    ;
 
-op      : PLUS { $$ = "+"; }
-        | MINUS { $$ = "-"; }
-        | STAR { $$ = "*"; }
-        | SLASH { $$ = "/"; }
-        ;
+op
+    : PLUS { $$ = "+"; }
+    | MINUS { $$ = "-"; }
+    | STAR { $$ = "*"; }
+    | SLASH { $$ = "/"; }
+    ;
+
+terminator
+    : NEWLINE
+    | END
+    ;
 
 %%
 

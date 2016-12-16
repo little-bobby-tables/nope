@@ -5,7 +5,7 @@
 
     std::stack<int> indent_lvls;
     int current_line_indent_lvl = 0;
-    bool dedenting = false;
+    bool unindenting_multiple_lvls = false;
 
     #define yyterminate() return Lang::Parser::make_END(*yylloc)
 
@@ -46,7 +46,7 @@
      if (indent_lvls.top() != 0) {
             indent_lvls.pop();
             if (current_line_indent_lvl != indent_lvls.top()) {
-                /* We're doing multiple dedents, but we can't return multiple tokens.
+                /* We're doing multiple unindents, but we can't return multiple tokens.
                  * To do that, add fake lines with remaining indentation - we'll handle
                  * them here again. */
                 unput('\n');
@@ -56,36 +56,31 @@
             } else {
                 BEGIN(next_mode);
             }
-            return Lang::Parser::make_DEDENT(*yylloc);
+            return Lang::Parser::make_UNINDENT(*yylloc);
         } else {
             yyterminate();
         }
 }
 <line_indent>.       {
-    if (!dedenting) unput(*yytext);
+    if (!unindenting_multiple_lvls) unput(*yytext);
     yylloc->columns(-1);
-    dedenting = false;
+    unindenting_multiple_lvls = false;
     if (current_line_indent_lvl > indent_lvls.top()) {
-        std::cout << "--lex indent: current " << current_line_indent_lvl << " prev: " << indent_lvls.top() << std::endl;
         indent_lvls.push(current_line_indent_lvl);
         BEGIN(next_mode);
         return Lang::Parser::make_INDENT(*yylloc);
     } else if (current_line_indent_lvl < indent_lvls.top()) {
         indent_lvls.pop();
         if (current_line_indent_lvl != indent_lvls.top()) {
-            /* Just like before, we need to return multiple DEDENT tokens. */
+            unindenting_multiple_lvls = true;
+            /* Treat one unindent at a time */
             for (int i = 0; i < current_line_indent_lvl; i++) {
                 unput(' '); unput(' ');
             }
             unput('\n');
-            /* Now we need to return to this block; insert a symbol
-             * that will be caught by this rule:
-             */
+            /* Insert fake symbol to return to this action... */
             unput(';');
-            /* And make sure that we don't treat it as an actual token */
-            dedenting = true;
-            /* That allows us to treat one dedent at a time. Now unput the
-             * rest so we can handle it later. */
+            /* ...and handle the rest of the unindent */
             for (int i = 0; i < indent_lvls.top(); i++) {
                 unput(' '); unput(' ');
             }
@@ -93,7 +88,12 @@
         } else {
             BEGIN(next_mode);
         }
-        return Lang::Parser::make_DEDENT(*yylloc);
+        /* By design, unindent is expected to be followed by the NEWLINE token */
+        for (int i = 0; i < indent_lvls.top(); i++) {
+            unput(' '); unput(' ');
+        }
+        unput('\n');
+        return Lang::Parser::make_UNINDENT(*yylloc);
     } else {
         /* Indentation unchanged */
         BEGIN(next_mode);
@@ -104,6 +104,7 @@
     current_line_indent_lvl = 0;
     next_mode = YY_START;
     BEGIN(line_indent);
+    return Lang::Parser::make_NEWLINE(*yylloc);
 }
 
 "if"   return Lang::Parser::make_K_IF(*yylloc);
