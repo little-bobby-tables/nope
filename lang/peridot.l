@@ -117,6 +117,11 @@
     return Lang::Parser::make_Integer(val, *yylloc);
 }
 
+[0-9]+[.][0-9]+ {
+    const float val = atof(yytext);
+    return Lang::Parser::make_Float(val, *yylloc);
+}
+
 [a-z][A-Za-z0-9_]* {
     return Lang::Parser::make_Reference(yytext, *yylloc);
 }
@@ -129,6 +134,7 @@
 "(" return Lang::Parser::make_LeftParenthesis(*yylloc);
 ")" return Lang::Parser::make_RightParenthesis(*yylloc);
 "," return Lang::Parser::make_Comma(*yylloc);
+"." return Lang::Parser::make_Accessor(*yylloc);
 
 [ ] { }
 

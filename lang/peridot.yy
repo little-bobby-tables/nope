@@ -38,14 +38,16 @@
 %token Indentation Unindentation Newline
 
 %token <int>           Integer
+%token <float>         Float
 %token <std::string>   Reference
 
 %token Assignment Addition Subtraction Multiplication Division
-%token LeftParenthesis RightParenthesis Comma
+%token LeftParenthesis RightParenthesis Accessor Comma
 %token Do If Then Else
 
 %type <std::string>    expressions
-%type <std::string>    expression infix_expression
+%type <std::string>    expression infix_expression dynamic_expression
+%type <std::string>    reference_chain
 %type <std::string>    function_call function_call_args
 %type <std::string>    assignment
 %type <std::string>    if_statement
@@ -53,6 +55,7 @@
 %type <std::string>    value
 
 %nonassoc LeftParenthesis RightParenthesis
+%left Accessor
 %left Assignment
 %left Addition Subtraction
 %left Multiplication Division
@@ -83,16 +86,13 @@ expression
     | infix_expression {
         $$ = $1;
     }
+    | dynamic_expression {
+        $$ = $1;
+    }
     | if_statement {
         $$ = $1;
     }
-    | function_call {
-        $$ = $1;
-    }
-    | value {
-        $$ = $1;
-    }
-    | Reference {
+    | reference_chain {
         $$ = "(ref " + $1 + ")";
     }
     ;
@@ -103,9 +103,33 @@ assignment
     }
     ;
 
+dynamic_expression
+    : LeftParenthesis expression RightParenthesis {
+        $$ = "(" + $2 + ")";
+    }
+    | function_call {
+        $$ = $1;
+    }
+    | value {
+        $$ = $1;
+    }
+    ;
+
+reference_chain
+    : reference_chain Accessor Reference {
+        $$ = $1 + " -> " + $3;
+    }
+    | dynamic_expression Accessor Reference {
+        $$ = $1 + " -> " + $3;
+    }
+    | Reference {
+        $$ = $1;
+    }
+    ;
+
 function_call
     : Reference LeftParenthesis function_call_args RightParenthesis {
-        $$ = "(fcall " + $1 + " with args " + $3 + ")";
+        $$ = "(call " + $1 + " with args " + $3 + ")";
     }
     ;
 
@@ -146,25 +170,24 @@ if_statement
     ;
 
 infix_expression
-    : LeftParenthesis expression RightParenthesis {
-        $$ = "(expr " + $2 + ")";
-    }
-    | expression Addition expression {
-        $$ = "(expr " + $1 + " + " + $3 + ")";
+    : expression Addition expression {
+        $$ = "(" + $1 + " + " + $3 + ")";
     }
     | expression Subtraction expression {
-        $$ = "(expr " + $1 + " - " + $3 + ")";
+        $$ = "(" + $1 + " - " + $3 + ")";
     }
     | expression Multiplication expression {
-        $$ = "(expr " + $1 + " * " + $3 + ")";
+        $$ = "(" + $1 + " * " + $3 + ")";
     }
     | expression Division expression {
-        $$ = "(expr " + $1 + " / " + $3 + ")";
+        $$ = "(" + $1 + " / " + $3 + ")";
     }
-
 value
     : Integer {
         $$ = "(int " + std::to_string($1) + ")";
+    }
+    | Float {
+        $$ = "(float " + std::to_string($1) + ")";
     }
     ;
 
