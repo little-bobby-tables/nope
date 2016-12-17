@@ -182,6 +182,7 @@ infix_expression
     | expression Division expression {
         $$ = "(" + $1 + " / " + $3 + ")";
     }
+
 value
     : Integer {
         $$ = "(int " + std::to_string($1) + ")";
