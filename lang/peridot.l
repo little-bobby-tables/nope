@@ -111,6 +111,7 @@
 "then" return Lang::Parser::make_Then(*yylloc);
 "else" return Lang::Parser::make_Else(*yylloc);
 "do"   return Lang::Parser::make_Do(*yylloc);
+"fn"   return Lang::Parser::make_Fn(*yylloc);
 
 [0-9]+ {
     const int val = atoi(yytext);
@@ -135,6 +136,8 @@
 ")" return Lang::Parser::make_RightParenthesis(*yylloc);
 "," return Lang::Parser::make_Comma(*yylloc);
 "." return Lang::Parser::make_Accessor(*yylloc);
+"?" return Lang::Parser::make_WildcardElement(*yylloc);
+"->" return Lang::Parser::make_Arrow(*yylloc);
 
 [ ] { }
 

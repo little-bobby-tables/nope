@@ -42,13 +42,15 @@
 %token <std::string>   Reference
 
 %token Assignment Addition Subtraction Multiplication Division
-%token LeftParenthesis RightParenthesis Accessor Comma
-%token Do If Then Else
+%token LeftParenthesis RightParenthesis 
+%token Accessor Comma Arrow WildcardElement
+%token Do If Then Else Fn
 
 %type <std::string>    expressions
-%type <std::string>    expression infix_expression dynamic_expression
+%type <std::string>    expression infix_expression
 %type <std::string>    reference_chain
-%type <std::string>    function_call function_call_args
+%type <std::string>    function_call function_definition
+%type <std::string>    function_parameters parameter_list function_arguments argument_list
 %type <std::string>    assignment
 %type <std::string>    if_statement
 %type <std::string>    block
@@ -86,28 +88,16 @@ expression
     | infix_expression {
         $$ = $1;
     }
-    | dynamic_expression {
-        $$ = $1;
+    | reference_chain {
+        $$ = "(ref " + $1 + ")";
     }
     | if_statement {
         $$ = $1;
     }
-    | reference_chain {
-        $$ = "(ref " + $1 + ")";
-    }
-    ;
-
-assignment
-    : Reference Assignment expression {
-        $$ = "(asgn " + $1 + " = " + $3 + ")";
-    }
-    ;
-
-dynamic_expression
-    : LeftParenthesis expression RightParenthesis {
-        $$ = "(" + $2 + ")";
-    }
     | function_call {
+        $$ = $1;
+    }
+    | function_definition {
         $$ = $1;
     }
     | value {
@@ -115,12 +105,45 @@ dynamic_expression
     }
     ;
 
+assignment
+    : reference_chain Assignment expression {
+        $$ = "(asgn " + $1 + " = " + $3 + ")";
+    }
+    ;
+
 reference_chain
     : reference_chain Accessor Reference {
-        $$ = $1 + " -> " + $3;
+        $$ = $1 + " . " + $3;
     }
-    | dynamic_expression Accessor Reference {
-        $$ = $1 + " -> " + $3;
+    | expression Accessor Reference {
+        $$ = $1 + " . " + $3;
+    }
+    | Reference {
+        $$ = $1;
+    }
+    ;
+
+function_definition
+    : Fn function_parameters Arrow expression {
+        $$ = "(fn " + $2 + " -> " + $4 + ")";
+    }
+    | Fn function_parameters Arrow block {
+        $$ = "(fn " + $2 + " -> " + $4 + ")";
+    }
+    ;
+
+function_parameters
+    : LeftParenthesis parameter_list RightParenthesis {
+        $$ = $2;
+    }
+    | LeftParenthesis RightParenthesis {
+        $$ = "()";
+    }
+    ;
+
+parameter_list
+    : parameter_list Comma Reference {
+        $$ = $1 + $3;
     }
     | Reference {
         $$ = $1;
@@ -128,17 +151,32 @@ reference_chain
     ;
 
 function_call
-    : Reference LeftParenthesis function_call_args RightParenthesis {
-        $$ = "(call " + $1 + " with args " + $3 + ")";
+    : reference_chain function_arguments {
+        $$ = "(call " + $1 + " with args " + $2 + ")";
     }
     ;
 
-function_call_args
-    : function_call_args Comma expression {
+function_arguments
+    : LeftParenthesis argument_list RightParenthesis {
+        $$ = $2;
+    }
+    | LeftParenthesis RightParenthesis {
+        $$ = "()";
+    }
+    ;
+
+argument_list
+    : argument_list Comma expression {
         $$ = $1 + $3;
+    }
+    | argument_list Comma WildcardElement {
+        $$ = $1 + "(?)";
     }
     | expression {
         $$ = $1;
+    }
+    | WildcardElement {
+        $$ = "(?)";
     }
     ;
 
@@ -170,7 +208,10 @@ if_statement
     ;
 
 infix_expression
-    : expression Addition expression {
+    : LeftParenthesis expression RightParenthesis {
+        $$ = "(" + $2 + ")";
+    }
+    | expression Addition expression {
         $$ = "(" + $1 + " + " + $3 + ")";
     }
     | expression Subtraction expression {
