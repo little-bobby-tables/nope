@@ -40,7 +40,9 @@
 %token <int>           Integer
 %token <float>         Float
 %token <std::string>   Reference
+%token <std::string>   ClassReference
 
+%token Class Method
 %token Assignment Addition Subtraction Multiplication Division
 %token LeftParenthesis RightParenthesis 
 %token Accessor Comma Arrow WildcardElement
@@ -51,6 +53,8 @@
 %type <std::string>    reference_chain
 %type <std::string>    function_call function_definition
 %type <std::string>    function_parameters parameter_list function_arguments argument_list
+%type <std::string>    class_declaration class_block class_expression class_expressions
+%type <std::string>    method_definition
 %type <std::string>    assignment
 %type <std::string>    if_statement
 %type <std::string>    block
@@ -101,6 +105,9 @@ expression
         $$ = $1;
     }
     | value {
+        $$ = $1;
+    }
+    | class_declaration {
         $$ = $1;
     }
     ;
@@ -236,6 +243,43 @@ value
 terminator
     : Newline
     | EndOfInput
+    ;
+
+/* OOP features */
+
+class_expressions
+    : class_expressions terminator class_expression {
+        $$ = $1 + $3;
+    }
+    | class_expression {
+        $$ = $1;
+    }
+    ;
+
+class_expression
+    : method_definition {
+        $$ = $1;
+    }
+    ;
+
+class_block
+    : terminator Indentation class_expressions Unindentation {
+        $$ = "(class_block " + $3 + ")";
+    }
+    ;
+
+class_declaration
+    : Class ClassReference class_block {
+        $$ = "(class " + $2 + " " + $3 + ")";
+    }
+
+method_definition
+    : Method Reference block {
+        $$ = "(method " + $2 + ": " + $3 + ")";
+    }
+    | Method Reference function_arguments block {
+        $$ = "(method " + $2 + " (" + $3 + ") " + $4 + ")";
+    }
     ;
 
 %%

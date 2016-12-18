@@ -107,11 +107,13 @@
     return Lang::Parser::make_Newline(*yylloc);
 }
 
-"if"   return Lang::Parser::make_If(*yylloc);
-"then" return Lang::Parser::make_Then(*yylloc);
-"else" return Lang::Parser::make_Else(*yylloc);
-"do"   return Lang::Parser::make_Do(*yylloc);
-"fn"   return Lang::Parser::make_Fn(*yylloc);
+"if"     return Lang::Parser::make_If(*yylloc);
+"then"   return Lang::Parser::make_Then(*yylloc);
+"else"   return Lang::Parser::make_Else(*yylloc);
+"do"     return Lang::Parser::make_Do(*yylloc);
+"fn"     return Lang::Parser::make_Fn(*yylloc);
+"class"  return Lang::Parser::make_Class(*yylloc);
+"method" return Lang::Parser::make_Method(*yylloc);
 
 [0-9]+ {
     const int val = atoi(yytext);
@@ -125,6 +127,10 @@
 
 [a-z][A-Za-z0-9_]* {
     return Lang::Parser::make_Reference(yytext, *yylloc);
+}
+
+(([A-Z][A-Z]?|[0-9]+[A-Z]?)[a-z]+)+ {
+    return Lang::Parser::make_ClassReference(yytext, *yylloc);
 }
 
 "=" return Lang::Parser::make_Assignment(*yylloc);
