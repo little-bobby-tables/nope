@@ -114,6 +114,7 @@
 "fn"     return Lang::Parser::make_Fn(*yylloc);
 "class"  return Lang::Parser::make_Class(*yylloc);
 "method" return Lang::Parser::make_Method(*yylloc);
+"new"    return Lang::Parser::make_New(*yylloc);
 
 [0-9]+ {
     const int val = atoi(yytext);

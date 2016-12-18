@@ -42,7 +42,7 @@
 %token <std::string>   Reference
 %token <std::string>   ClassReference
 
-%token Class Method
+%token Class Method New
 %token Assignment Addition Subtraction Multiplication Division
 %token LeftParenthesis RightParenthesis 
 %token Accessor Comma Arrow WildcardElement
@@ -54,7 +54,7 @@
 %type <std::string>    function_call function_definition
 %type <std::string>    function_parameters parameter_list function_arguments argument_list
 %type <std::string>    class_declaration class_block class_expression class_expressions
-%type <std::string>    method_definition
+%type <std::string>    constructor_definition method_definition
 %type <std::string>    assignment
 %type <std::string>    if_statement
 %type <std::string>    block
@@ -257,7 +257,10 @@ class_expressions
     ;
 
 class_expression
-    : method_definition {
+    : constructor_definition {
+        $$ = $1;
+    }
+    | method_definition {
         $$ = $1;
     }
     ;
@@ -272,6 +275,12 @@ class_declaration
     : Class ClassReference class_block {
         $$ = "(class " + $2 + " " + $3 + ")";
     }
+
+constructor_definition
+    : New function_arguments block {
+        $$ = "(constructor " + $2 + ": " + $3 + ")";
+    }
+    ;
 
 method_definition
     : Method Reference block {
