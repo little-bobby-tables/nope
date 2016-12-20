@@ -8,6 +8,8 @@
     bool unindenting_multiple_lvls = false;
 
     #define yyterminate() return Lang::Parser::make_EndOfInput(*yylloc)
+    #define return_token(token) return Lang::Parser::make_##token(*yylloc)
+    #define return_value_token(token, val) return Lang::Parser::make_##token(val, *yylloc)
 
     #define YY_USER_INIT { indent_lvls.push(0); BEGIN(initial_line_indent); }
     #define YY_USER_ACTION { yylloc->columns(yyleng); }
@@ -107,44 +109,44 @@
     return Lang::Parser::make_Newline(*yylloc);
 }
 
-"if"     return Lang::Parser::make_If(*yylloc);
-"then"   return Lang::Parser::make_Then(*yylloc);
-"else"   return Lang::Parser::make_Else(*yylloc);
-"do"     return Lang::Parser::make_Do(*yylloc);
-"fn"     return Lang::Parser::make_Fn(*yylloc);
-"class"  return Lang::Parser::make_Class(*yylloc);
-"method" return Lang::Parser::make_Method(*yylloc);
-"new"    return Lang::Parser::make_New(*yylloc);
+"if"     return_token(If);
+"then"   return_token(Then);
+"else"   return_token(Else);
+"do"     return_token(Do);
+"fn"     return_token(Fn);
+"class"  return_token(Class);
+"method" return_token(Method);
+"new"    return_token(New);
 
 [0-9]+ {
     const int val = atoi(yytext);
-    return Lang::Parser::make_Integer(val, *yylloc);
+    return_value_token(Integer, val);
 }
 
 [0-9]+[.][0-9]+ {
     const float val = atof(yytext);
-    return Lang::Parser::make_Float(val, *yylloc);
+    return_value_token(Float, val);
 }
 
 [a-z][A-Za-z0-9_]* {
-    return Lang::Parser::make_Reference(yytext, *yylloc);
+    return_value_token(Reference, yytext);
 }
 
 (([A-Z][A-Z]?|[0-9]+[A-Z]?)[a-z]+)+ {
-    return Lang::Parser::make_ClassReference(yytext, *yylloc);
+    return_value_token(ClassReference, yytext);
 }
 
-"=" return Lang::Parser::make_Assignment(*yylloc);
-"+" return Lang::Parser::make_Addition(*yylloc);
-"-" return Lang::Parser::make_Subtraction(*yylloc);
-"*" return Lang::Parser::make_Multiplication(*yylloc);
-"/" return Lang::Parser::make_Division(*yylloc);
-"(" return Lang::Parser::make_LeftParenthesis(*yylloc);
-")" return Lang::Parser::make_RightParenthesis(*yylloc);
-"," return Lang::Parser::make_Comma(*yylloc);
-"." return Lang::Parser::make_Accessor(*yylloc);
-"?" return Lang::Parser::make_WildcardElement(*yylloc);
-"->" return Lang::Parser::make_Arrow(*yylloc);
+"=" return_token(Assignment);
+"+" return_token(Addition);
+"-" return_token(Subtraction);
+"*" return_token(Multiplication);
+"/" return_token(Division);
+"(" return_token(LeftParenthesis);
+")" return_token(RightParenthesis);
+"," return_token(Comma);
+"." return_token(Accessor);
+"?" return_token(WildcardElement);
+"->" return_token(Arrow);
 
 [ ] { }
 
