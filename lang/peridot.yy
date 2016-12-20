@@ -15,7 +15,7 @@
 %parse-param { Core &core }
 
 %code requires {
-    #include <string>
+    #include "ast.hpp"
 
     namespace Lang {
         class Lexer;
@@ -60,6 +60,8 @@
 %type <std::string>    block
 %type <std::string>    value
 
+%type <Lang::ProgramNode*>    program
+
 %nonassoc LeftParenthesis RightParenthesis
 %left Accessor
 %left Assignment
@@ -72,7 +74,8 @@
 
 program
     : expressions {
-        core.parsing_finished($1);
+        $$ = new ProgramNode($1);
+        std::cout << *((std::string*)($$->evaluate())) << std::endl;
     }
     ;
 
