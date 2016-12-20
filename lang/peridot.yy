@@ -48,7 +48,6 @@
 %token Accessor Comma Arrow WildcardElement
 %token Do If Then Else Fn
 
-%type <std::string>    expressions
 %type <std::string>    expression infix_expression
 %type <std::string>    reference_chain
 %type <std::string>    function_call function_definition
@@ -60,7 +59,7 @@
 %type <std::string>    block
 %type <std::string>    value
 
-%type <Lang::ProgramNode*>    program
+%type <Lang::ExpressionsNode*>    program expressions
 
 %nonassoc LeftParenthesis RightParenthesis
 %left Accessor
@@ -74,17 +73,19 @@
 
 program
     : expressions {
-        $$ = new ProgramNode($1);
+        $$ = $1;
         std::cout << *((std::string*)($$->evaluate())) << std::endl;
     }
     ;
 
 expressions
     : expression terminator {
-        $$ = $1;
+        $$ = new ExpressionsNode();
+        $$->push_expression($1);
     }
     | expressions expression terminator {
-        $$ = $1 + $2;
+        $$ = $1;
+        $$->push_expression($2);
     }
     ;
 
@@ -192,7 +193,7 @@ argument_list
 
 block
     : terminator Indentation expressions Unindentation {
-        $$ = "(block " + $3 + ")";
+        $$ = "(block " + *((std::string*)($3->evaluate())) + ")";
     }
     ;
 

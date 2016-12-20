@@ -8,35 +8,22 @@ namespace Lang {
         public:
             virtual Value evaluate() = 0;
     };
-
+  
     class ExpressionsNode : public ASTNode {
         public:
             ExpressionsNode() = default;
-            Value evaluate() {
-                return (Value)nullptr;
-            }
-    };
-
-    class ProgramNode : public ASTNode {
-        public:
-            ProgramNode() = default;
-            ProgramNode(std::string expressions) {
-                this->program = expressions;
+            void push_expression(std::string expression) {
+                this->expressions.push_back(expression);
             }
             Value evaluate() {
-                return (Value)(new std::string(this->program));
+                std::string *out = new std::string();
+                for (int i = 0; i < this->expressions.size(); i++) {
+                    *out += this->expressions[i];
+                }
+                return (Value)(out);
             }
         private:
-            std::string program;
-            /*
-            ProgramNode(ExpressionsNode& program_node) {
-                this->program = program_node;
-            }
-            Value evaluate() {
-                return (Value)(new std::string("hi!"));
-            }
-        private:
-            ExpressionsNode program;*/
+            std::vector<std::string> expressions;
     };
 }
 
