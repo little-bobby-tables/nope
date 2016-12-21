@@ -188,7 +188,6 @@ namespace Lang {
                 this->value = value;
             }
             Value evaluate() {
-                std::cout << "fuck you" << std::endl;
                 return string_to_value(std::to_string(this->value));
             }
         private:
