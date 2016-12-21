@@ -1,7 +1,7 @@
 CXX=g++
 DEBUG=-g
 CXXFLAGS=-g -std=c++11
-SRC=$(filter-out parser.cpp tokenizer.cpp evaluator.cpp, $(wildcard *.cpp))
+SRC=$(wildcard *.cpp)
 LANG=lang/core.cpp
 LANG_GENERATED=lang/parser.o lang/lexer.o
 OBJ=$(SRC:%.cpp=%.o) $(LANG:%.cpp=%.o) $(LANG_GENERATED)

@@ -1,8 +1,5 @@
 #include <iostream>
-#include "parser.h"
-#include "tokenizer.h"
-#include "evaluator.h"
-
+#include <sstream>
 #include "lang/core.h"
 
 using namespace std;
