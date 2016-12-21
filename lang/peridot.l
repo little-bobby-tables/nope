@@ -119,12 +119,12 @@
 "new"    return_token(New);
 
 [0-9]+ {
-    const int val = atoi(yytext);
+    const long val = atol(yytext);
     return_value_token(Integer, val);
 }
 
 [0-9]+[.][0-9]+ {
-    const float val = atof(yytext);
+    const double val = atof(yytext);
     return_value_token(Float, val);
 }
 

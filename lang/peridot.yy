@@ -37,8 +37,8 @@
 %token EndOfInput 0
 %token Indentation Unindentation Newline
 
-%token <int>           Integer
-%token <float>         Float
+%token <long>          Integer
+%token <double>        Float
 %token <std::string>   Reference
 %token <std::string>   ClassReference
 
@@ -48,18 +48,23 @@
 %token Accessor Comma Arrow WildcardElement
 %token Do If Then Else Fn
 
-%type <std::string>    expression infix_expression
-%type <std::string>    reference_chain
-%type <std::string>    function_call function_definition
-%type <std::string>    function_parameters parameter_list function_arguments argument_list
+/* OOP features
 %type <std::string>    class_declaration class_block class_expression class_expressions
 %type <std::string>    constructor_definition method_definition
-%type <std::string>    assignment
-%type <std::string>    if_statement
-%type <std::string>    block
-%type <std::string>    value
+*/
 
-%type <Lang::ExpressionsNode*>    program expressions
+%type <Lang::ExpressionListNode*>       expression_list
+%type <Lang::ExpressionNode*>           expression
+%type <Lang::ReferenceChainNode*>       reference_chain
+%type <Lang::AssignmentNode*>           assignment
+%type <Lang::FunctionDefinitionNode*>   function_definition
+%type <Lang::ParameterList>             function_parameters parameter_list
+%type <Lang::BlockNode*>                block
+%type <Lang::GeneralCallArgumentsNode*> general_call_arguments general_call_argument_list
+%type <Lang::GeneralCallNode*>          general_call
+%type <Lang::IfExpressionNode*>         if_expression
+%type <Lang::InfixOpNode*>              infix_op_expression
+%type <Lang::ValueNode*>                value
 
 %nonassoc LeftParenthesis RightParenthesis
 %left Accessor
@@ -72,74 +77,65 @@
 %%
 
 program
-    : expressions {
-        $$ = $1;
-        std::cout << *((std::string*)($$->evaluate())) << std::endl;
+    : expression_list {
+        std::cout << *((std::string*)($1->evaluate())) << std::endl;
     }
     ;
 
-expressions
-    : expression terminator {
-        $$ = new ExpressionsNode();
-        $$->push_expression($1);
-    }
-    | expressions expression terminator {
+expression_list
+    : expression_list expression terminator {
         $$ = $1;
-        $$->push_expression($2);
+        $$->push($2);
+    }
+    | expression terminator {
+        $$ = new ExpressionListNode();
+        $$->push($1);
     }
     ;
 
 expression
-    : assignment {
-        $$ = $1;
-    }
-    | infix_expression {
-        $$ = $1;
-    }
-    | reference_chain {
-        $$ = "(ref " + $1 + ")";
-    }
-    | if_statement {
-        $$ = $1;
-    }
-    | function_call {
-        $$ = $1;
-    }
-    | function_definition {
-        $$ = $1;
-    }
-    | value {
-        $$ = $1;
-    }
-    | class_declaration {
-        $$ = $1;
-    }
+    : LeftParenthesis expression RightParenthesis { $$ = $2; }
+    | assignment                                  { $$ = $1; }
+    | infix_op_expression                         { $$ = $1; }
+    | reference_chain                             { $$ = $1; }
+    | if_expression                               { $$ = $1; }
+    | general_call                                { $$ = $1; }
+    | function_definition                         { $$ = $1; }
+    | value                                       { $$ = $1; }
     ;
+/* OOP features:
+    | class_declaration   { $$ = $1; }
+    ;
+*/
 
 assignment
     : reference_chain Assignment expression {
-        $$ = "(asgn " + $1 + " = " + $3 + ")";
+        $$ = new AssignmentNode($1, $3);
     }
     ;
 
 reference_chain
     : reference_chain Accessor Reference {
-        $$ = $1 + " . " + $3;
+        $$ = $1;
+        $$->append(new ReferenceNode($3));
     }
     | expression Accessor Reference {
-        $$ = $1 + " . " + $3;
+        $$ = new ReferenceChainNode();
+        $$->append($1);
+        $$->append(new ReferenceNode($3));           
     }
     | Reference {
-        $$ = $1;
+        $$ = new ReferenceChainNode();
+        $$->append(new ReferenceNode($1));
     }
     ;
 
 function_definition
     : Fn function_parameters Arrow expression {
-        $$ = "(fn " + $2 + " -> " + $4 + ")";
+        $$ = new FunctionDefinitionNode($2, $4);
     }
     | Fn function_parameters Arrow block {
-        $$ = "(fn " + $2 + " -> " + $4 + ")";
+        $$ = new FunctionDefinitionNode($2, $4);
     }
     ;
 
@@ -148,99 +144,99 @@ function_parameters
         $$ = $2;
     }
     | LeftParenthesis RightParenthesis {
-        $$ = "()";
+        $$ = ParameterList();
     }
     ;
 
 parameter_list
     : parameter_list Comma Reference {
-        $$ = $1 + $3;
+        $$ = $1;
+        $1.push_back($3);
     }
     | Reference {
-        $$ = $1;
+        $$ = ParameterList();
     }
     ;
 
-function_call
-    : reference_chain function_arguments {
-        $$ = "(call " + $1 + " with args " + $2 + ")";
+general_call
+    : reference_chain general_call_arguments {
+        $$ = new GeneralCallNode($1, $2);
     }
     ;
 
-function_arguments
-    : LeftParenthesis argument_list RightParenthesis {
+general_call_arguments
+    : LeftParenthesis general_call_argument_list RightParenthesis {
         $$ = $2;
     }
     | LeftParenthesis RightParenthesis {
-        $$ = "()";
+        $$ = new GeneralCallArgumentsNode();
     }
     ;
 
-argument_list
-    : argument_list Comma expression {
-        $$ = $1 + $3;
+general_call_argument_list
+    : general_call_argument_list Comma expression {
+        $$ = $1;
+        $$->push($3);
     }
-    | argument_list Comma WildcardElement {
-        $$ = $1 + "(?)";
-    }
-    | expression {
+    | general_call_argument_list Comma WildcardElement {
         $$ = $1;
     }
+    | expression {
+        $$ = new GeneralCallArgumentsNode();
+        $$->push($1);
+    }
     | WildcardElement {
-        $$ = "(?)";
+        $$ = new GeneralCallArgumentsNode();
     }
     ;
 
 block
-    : terminator Indentation expressions Unindentation {
-        $$ = "(block " + *((std::string*)($3->evaluate())) + ")";
+    : terminator Indentation expression_list Unindentation {
+        $$ = new BlockNode($3);
     }
     ;
 
-if_statement
-    : If expression Then expression {
-        $$ = "(if " + $2 + " then " + $4 + ")";
+if_expression
+    : If expression Then expression { 
+        $$ = new IfExpressionNode($2, $4); 
     }
-    | If expression Then block {
-        $$ = "(if " + $2 + " then " + $4 + ")";
+    | If expression Then block { 
+        $$ = new IfExpressionNode($2, $4); 
     }
-    | If expression Then expression Else expression {
-        $$ = "(if " + $2 + " then " + $4 + " else " + $6 + ")";
+    | If expression Then expression Else expression { 
+        $$ = new IfExpressionNode($2, $4, $6);
     }
     | If expression Then expression Else block {
-        $$ = "(if " + $2 + " then " + $4 + " else " + $6 + ")";
+        $$ = new IfExpressionNode($2, $4, $6);
     }
     | If expression Then block terminator Else expression {
-        $$ = "(if " + $2 + " then " + $4 + " else " + $7 + ")";
+        $$ = new IfExpressionNode($2, $4, $7);
     }
     | If expression Then block terminator Else block {
-        $$ = "(if " + $2 + " then " + $4 + " else " + $7 + ")";
+        $$ = new IfExpressionNode($2, $4, $7);
     }
     ;
 
-infix_expression
-    : LeftParenthesis expression RightParenthesis {
-        $$ = "(" + $2 + ")";
-    }
-    | expression Addition expression {
-        $$ = "(" + $1 + " + " + $3 + ")";
+infix_op_expression
+    : expression Addition expression {
+        $$ = new InfixOpNode($1, $3, "+");
     }
     | expression Subtraction expression {
-        $$ = "(" + $1 + " - " + $3 + ")";
+        $$ = new InfixOpNode($1, $3, "-");
     }
     | expression Multiplication expression {
-        $$ = "(" + $1 + " * " + $3 + ")";
+        $$ = new InfixOpNode($1, $3, "*");
     }
     | expression Division expression {
-        $$ = "(" + $1 + " / " + $3 + ")";
+        $$ = new InfixOpNode($1, $3, "/");
     }
 
 value
     : Integer {
-        $$ = "(int " + std::to_string($1) + ")";
+        $$ = new IntegerValueNode($1);
     }
     | Float {
-        $$ = "(float " + std::to_string($1) + ")";
+        $$ = new FloatValueNode($1);
     }
     ;
 
@@ -249,7 +245,7 @@ terminator
     | EndOfInput
     ;
 
-/* OOP features */
+/* OOP features
 
 class_expressions
     : class_expressions terminator class_expression {
@@ -294,6 +290,7 @@ method_definition
         $$ = "(method " + $2 + " (" + $3 + ") " + $4 + ")";
     }
     ;
+*/
 
 %%
 
