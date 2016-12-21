@@ -1,11 +1,12 @@
 #include <iostream>
 #include <sstream>
-#include "lang/core.h"
+
+#include "lang/driver.hpp"
 
 using namespace std;
 
 int main(void) {
-    Lang::Core c;
+    Lang::Driver lang;
     while (true) {
         string line = "", buf = "";
         cout << "peridot=> " << endl;
@@ -19,7 +20,7 @@ int main(void) {
 
         if (line == "exit") break;
         std::istringstream is(line); /* TODO: dirty! */
-        c.parse(is);
+        lang.parse(is);
     }
     return 0;
 }

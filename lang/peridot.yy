@@ -4,7 +4,7 @@
 %defines
 %debug
 %error-verbose
-%define api.namespace { Lang }
+%define api.namespace     { Lang }
 %define parser_class_name { Parser }
 
 %define api.token.constructor
@@ -12,14 +12,14 @@
 %define parse.assert
 
 %parse-param { Lexer &lexer }
-%parse-param { Core &core }
+%parse-param { Driver &driver }
 
 %code requires {
     #include "ast.hpp"
 
     namespace Lang {
         class Lexer;
-        class Core;
+        class Driver;
     };
 }
 
@@ -29,7 +29,7 @@
     #include <iostream>
     #include <cstdlib>
 
-    #include "core.h"
+    #include "driver.hpp"
 
     #define yylex lexer.LEXER_YYLEX
 }
