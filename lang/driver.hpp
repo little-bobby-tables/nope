@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <istream>
 
+#include "ast_visitor.h"
 #include "lexer.hpp"
 #include "parser.tab.hh"
 
@@ -27,10 +28,12 @@ namespace Lang {
                 lexer = new Lang::Lexer(&stream);
                 parser = new Lang::Parser(*lexer, *this);
                 
-                int result = parser->parse();
-                if (result != 0) {
-                    /* TODO: is this necessary? parser's already reporting the errors it encounters on its own */
-                }
+                parser->parse();
+            }
+            void parsing_finished(ExpressionListNode* program) {
+                std::cout << "received node" << std::endl;
+                ProgramASTVisitor v = ProgramASTVisitor();
+                program->accept(v);
             }
         private:
             Lang::Lexer* lexer = nullptr;

@@ -12,138 +12,150 @@
 namespace Lang {
     typedef std::vector<std::string> ParameterList;
 
+    class ASTVisitor;
+
     class ASTNode {
         public:
             ASTNode() = default;
-            virtual Value evaluate() = 0;
+            virtual void accept(ASTVisitor& visitor) = 0;
     };
 
-    class ExpressionNode : public ASTNode {
+    class ExpressionNode : public ASTNode {};
+    class ValueNode      : public ExpressionNode {};
+
+    class ExpressionListNode;
+    class ReferenceNode;
+    class ReferenceChainNode;
+    class AssignmentNode;
+    class FunctionDefinitionNode;
+    class GeneralCallNode;
+    class GeneralCallArgumentsNode;
+    class BlockNode;
+    class IfExpressionNode;
+    class InfixOpNode;
+
+    class IntegerValueNode;
+    class FloatValueNode;
+
+    class ASTVisitor {
         public:
-            Value evaluate() { return 0; }
+            virtual void visit(ExpressionListNode* node)       = 0;
+            virtual void visit(ReferenceNode* node)            = 0;
+            virtual void visit(ReferenceChainNode* node)       = 0;
+            virtual void visit(AssignmentNode* node)           = 0;
+            virtual void visit(FunctionDefinitionNode* node)   = 0;
+            virtual void visit(GeneralCallNode* node)          = 0;
+            virtual void visit(GeneralCallArgumentsNode *node) = 0;
+            virtual void visit(BlockNode* node)                = 0;
+            virtual void visit(IfExpressionNode* node)         = 0;
+            virtual void visit(InfixOpNode* node)              = 0;
+            virtual void visit(IntegerValueNode* node)         = 0;
+            virtual void visit(FloatValueNode* node)           = 0;
     };
 
     class ExpressionListNode : public ASTNode {
         public:
-            ~ExpressionListNode() { release_pointers(this->expressions); }
-            void push(ExpressionNode* node) { this->expressions.push_back(node); }
-            Value evaluate() {
-                std::string* out = new std::string();
-                for (int i = 0; i < this->expressions.size(); i++) {
-                    *out += value_to_string(this->expressions[i]->evaluate());
-                }
-                return (Value)(out);
-            }
-        private:
             std::vector<ExpressionNode*> expressions;
+
+            ~ExpressionListNode() {
+                release_pointers(this->expressions);
+            }
+            void push(ExpressionNode* node) {
+                this->expressions.push_back(node);
+            }
+            void accept(ASTVisitor& v) { v.visit(this); }
     };
 
     class ReferenceNode : public ExpressionNode {
         public:
+            std::string reference;
+
             ReferenceNode(std::string ref) {
                 this->reference = ref;
             }
-            Value evaluate() {
-                return string_to_value(this->reference);
-            }
-        private:
-            std::string reference;
+            void accept(ASTVisitor& v) { v.visit(this); }
     };
 
     class ReferenceChainNode : public ExpressionNode {
         public:
-            ~ReferenceChainNode() { release_pointers(this->chain); }
-
-            void append(ExpressionNode* ref) { this->chain.push_back(ref); }
-
-            Value evaluate() {
-                std::string out;
-                for (int i = 0; i < chain.size(); i++) {
-                    std::string* ev = value_to_string_ptr(chain[i]->evaluate());
-                    out += *ev;
-                    delete ev;
-                }
-                return string_to_value(out);
-            }
-        private:
             std::vector<ExpressionNode*> chain;
+
+            ~ReferenceChainNode() {
+                release_pointers(this->chain);
+            }
+            void append(ExpressionNode* ref) {
+                this->chain.push_back(ref);
+            }
+            void accept(ASTVisitor& v) { v.visit(this); }
     };
 
     class AssignmentNode : public ExpressionNode {
         public:
-            AssignmentNode(ReferenceChainNode* left, ExpressionNode* right) { 
+            ReferenceChainNode* left;
+            ExpressionNode* right;
+
+            AssignmentNode(ReferenceChainNode* left, ExpressionNode* right) {
                 this->left = left;
                 this->right = right;
             }
             ~AssignmentNode() {
                 delete this->left; delete this->right;
             }
-            Value evaluate() {
-                std::string* left_v = value_to_string_ptr(this->left->evaluate());
-                std::string* right_v = value_to_string_ptr(this->right->evaluate());
-                std::string out = *left_v + *right_v;
-                delete left_v; delete right_v;
-                return string_to_value(out); 
-            }
-        private:
-            ReferenceChainNode* left;
-            ExpressionNode* right;
+            void accept(ASTVisitor& v) { v.visit(this); }
     };
 
     class FunctionDefinitionNode : public ExpressionNode {
         public:
+            ParameterList params;
+            ExpressionNode* body;
+
             FunctionDefinitionNode(ParameterList params, ExpressionNode* body) {
                 this->params = params;
                 this->body = body;
             }
-            ~FunctionDefinitionNode() { delete this->body; }
-            Value evaluate() {
-                std::string* body_v = value_to_string_ptr(this->body->evaluate());
-                std::string out = "(fn";
-                for (int i = 0; i < this->params.size(); i++) {
-                    out += this->params[i];
-                }
-                out += " -> " + *body_v + ")";
-                delete body_v;
-                return string_to_value(out); 
+            ~FunctionDefinitionNode() {
+                delete this->body;
             }
-        private:
-            ParameterList params;
-            ExpressionNode* body;
+            void accept(ASTVisitor& v) { v.visit(this); }
     };
 
-    class GeneralCallArgumentsNode : public ExpressionListNode { };
+    class GeneralCallArgumentsNode : public ExpressionListNode {};
 
     class GeneralCallNode : public ExpressionNode {
         public:
+            ReferenceChainNode* target;
+            GeneralCallArgumentsNode* args;
+
             GeneralCallNode(ReferenceChainNode* target, GeneralCallArgumentsNode* args) {
                 this->target = target;
                 this->args = args;
             }
-            ~GeneralCallNode() { delete this->target; delete this->args; }
-            Value evaluate() {
-                return string_to_value("general_call_node");
+            ~GeneralCallNode() {
+                delete this->target;
+                delete this->args;
             }
-        private:
-            ReferenceChainNode* target;
-            GeneralCallArgumentsNode* args;
+            void accept(ASTVisitor& v) { v.visit(this); }
     };
 
     class BlockNode : public ExpressionNode {
         public:
+            ExpressionListNode* expressions;
+
             BlockNode(ExpressionListNode* node) {
                 this->expressions = node;
             }
-            ~BlockNode() { delete this->expressions; }
-            Value evaluate() {
-                return expressions->evaluate();
+            ~BlockNode() {
+                delete this->expressions;
             }
-        private:
-            ExpressionListNode* expressions;
+            void accept(ASTVisitor& v) { v.visit(this); }
     };
 
     class IfExpressionNode : public ExpressionNode {
         public:
+            ExpressionNode* condition;
+            ExpressionNode* then;
+            ExpressionNode* otherwise;
+
             IfExpressionNode(ExpressionNode* condition, ExpressionNode* then) {
                 this->condition = condition;
                 this->then = then;
@@ -154,56 +166,50 @@ namespace Lang {
                 this->then = then;
                 this->otherwise = otherwise;
             }
-            ~IfExpressionNode() { delete this->condition; delete this->then; delete this->otherwise; }
-
-            Value evaluate() {
-                return string_to_value("if_node");
+            ~IfExpressionNode() {
+                delete this->condition;
+                delete this->then;
+                delete this->otherwise;
             }
-        private:
-            ExpressionNode* condition;
-            ExpressionNode* then;
-            ExpressionNode* otherwise;
+            void accept(ASTVisitor& v) { v.visit(this); }
     };
 
     class InfixOpNode : public ExpressionNode {
         public:
+            ExpressionNode* left;
+            ExpressionNode* right;
+            std::string op;
+
             InfixOpNode(ExpressionNode* left, ExpressionNode* right, std::string op) {
                 this->left = left;
                 this->right = right;
                 this->op = op;
             }
-            ~InfixOpNode() { delete this->left; delete this->right; }
-            Value evaluate() { return string_to_value(op + " op node"); }
-        private:
-            ExpressionNode* left;
-            ExpressionNode* right;
-            std::string op;
+            ~InfixOpNode() {
+                delete this->left;
+                delete this->right;
+            }
+            void accept(ASTVisitor& v) { v.visit(this); }
     };
-
-    class ValueNode : public ExpressionNode {};
 
     class IntegerValueNode : public ValueNode {
         public:
+            long value;
+
             IntegerValueNode(long value) {
                 this->value = value;
             }
-            Value evaluate() {
-                return string_to_value(std::to_string(this->value));
-            }
-        private:
-            long value;
+            void accept(ASTVisitor& v) { v.visit(this); }
     };
 
     class FloatValueNode : public ValueNode {
         public:
+            double value;
+
             FloatValueNode(double value) {
                 this->value = value;
             }
-            Value evaluate() { 
-                return string_to_value(std::to_string(this->value));
-            }
-        private:
-            long value;
+            void accept(ASTVisitor& v) { v.visit(this); }
     };
 }
 

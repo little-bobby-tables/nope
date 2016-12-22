@@ -78,7 +78,7 @@
 
 program
     : expression_list {
-        std::cout << *((std::string*)($1->evaluate())) << std::endl;
+        driver.parsing_finished($1);
     }
     ;
 

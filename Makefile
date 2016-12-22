@@ -2,7 +2,7 @@ CXX=g++
 DEBUG=-g
 CXXFLAGS=-g -std=c++11
 SRC=$(wildcard *.cpp)
-LANG=lang/driver.hpp lang/ast.hpp
+LANG=lang/ast_visitor.cpp
 LANG_GENERATED=lang/parser.o lang/lexer.o
 OBJ=$(SRC:%.cpp=%.o) $(LANG:%.cpp=%.o) $(LANG_GENERATED)
 BIN=peridot
