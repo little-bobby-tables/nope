@@ -78,7 +78,7 @@
 
 program
     : expression_list {
-        driver.parsing_finished($1);
+        driver.parsed_ast = $1;
     }
     ;
 

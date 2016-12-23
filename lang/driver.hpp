@@ -8,7 +8,6 @@
 #include <cstddef>
 #include <istream>
 
-#include "ast_visitor.h"
 #include "lexer.hpp"
 #include "parser.tab.hh"
 
@@ -21,20 +20,17 @@ namespace Lang {
                 delete lexer;
                 delete parser;
             }
-            void parse(std::istream &stream) {
-                if (!stream.good() && stream.eof()) return;
+            ExpressionListNode* parse(std::istream &stream) {
+                if (!stream.good() && stream.eof()) return nullptr;
                 delete lexer;
                 delete parser;
                 lexer = new Lang::Lexer(&stream);
                 parser = new Lang::Parser(*lexer, *this);
                 
                 parser->parse();
+                return this->parsed_ast;
             }
-            void parsing_finished(ExpressionListNode* program) {
-                std::cout << "received node" << std::endl;
-                ProgramASTVisitor v = ProgramASTVisitor();
-                program->accept(v);
-            }
+            ExpressionListNode* parsed_ast = nullptr;
         private:
             Lang::Lexer* lexer = nullptr;
             Lang::Parser* parser = nullptr;

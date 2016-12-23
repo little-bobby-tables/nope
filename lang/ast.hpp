@@ -1,12 +1,10 @@
 #ifndef LANG_AST
 #define LANG_AST
 
+#include <vector>
+#include <string>
 #include <memory>
-#include "data.h"
 
-#define value_to_string_ptr(value) (std::string*)(value)
-#define value_to_string(value) *(value_to_string_ptr(value))
-#define string_to_value(str) (Value)(new std::string(str))
 #define release_pointers(vector) { for (size_t i = 0; i < vector.size(); i++) { delete vector[i]; } }
 
 namespace Lang {
