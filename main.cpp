@@ -6,16 +6,16 @@
 
 using namespace std;
 
-static_assert((sizeof(uintptr_t) == sizeof(long) && sizeof(long) == 8),
+static_assert((sizeof(uintptr_t) == 8 && sizeof(long) == 8 && sizeof(double) == 8),
 "Unsupported architecture: peridot was written with a single architecture in mind — x86-64. \
-It relies on long having the size of 8 bytes to store integers, providing enough capacity \
-for demonstration purposes and removing the need to handle bignums separately. \
+It relies on long and double having the size of 8 bytes to efficiently store numbers, \
+providing enough capacity for demonstration purposes and removing the need \
+to allocate those as objects. \
 Any attempt to make this thing cross-platform is just not worth the time.");
 
 int main(void) {
     Lang::Driver lang;
     VM::Driver vm;
-
     while (true) {
         string line = "", buf = "";
         cout << "peridot=> " << endl;

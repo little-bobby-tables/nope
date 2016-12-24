@@ -1,6 +1,6 @@
 CXX=g++
 DEBUG=-g
-CXXFLAGS=-g -std=c++11
+CXXFLAGS=-g -std=c++14
 SRC=$(wildcard *.cpp)
 VM=vm/ast_instruction_builder.cpp vm/core.cpp
 OBJ_GENERATED=lang/parser.o lang/lexer.o

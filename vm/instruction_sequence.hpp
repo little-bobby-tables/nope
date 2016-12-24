@@ -10,7 +10,7 @@ namespace VM {
             InstructionSequence(ByteSequence instructions) {
                 this->seq = instructions;
             }
-            unsigned char next() {
+            byte next() {
                 if (position < seq.size() - 1) {
                     return seq[position++];
                 } else {
@@ -18,16 +18,10 @@ namespace VM {
                 }
             }
             long get_int_value() {
-                long value =
-                    static_cast<long>(seq[position++])       |
-                    static_cast<long>(seq[position++]) << 8  |
-                    static_cast<long>(seq[position++]) << 16 |
-                    static_cast<long>(seq[position++]) << 24 |
-                    static_cast<long>(seq[position++]) << 32 |
-                    static_cast<long>(seq[position++]) << 40 |
-                    static_cast<long>(seq[position++]) << 48 |
-                    static_cast<long>(seq[position++]) << 56 ;
-                return value;
+                return unpack_8byte_value<long>();
+            }
+            double get_float_value() {
+                return unpack_8byte_value<double>();
             }
             std::string get_str_value() {
                 std::string str;
@@ -38,6 +32,15 @@ namespace VM {
                 return str;
             }
         private:
+            template<typename T>
+            inline T unpack_8byte_value() {
+                union { T value; byte packed[8]; } _conversion;
+                for (int i = 0; i < sizeof(long); i++) {
+                    _conversion.packed[i] = seq[position++];
+                }
+                return _conversion.value;
+            }
+
             size_t position = 0;
             ByteSequence seq;
     };

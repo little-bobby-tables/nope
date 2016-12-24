@@ -7,11 +7,12 @@
 #include <iostream>
 
 namespace VM {
-    typedef std::vector<unsigned char> ByteSequence;
+    typedef unsigned char byte;
+    typedef std::vector<byte> ByteSequence;
 
-    static const unsigned char i_send_msg_to_obj = 1;
-    static const unsigned char i_put_int         = 2;
-    static const unsigned char i_put_float       = 3;
+    static const byte i_send_msg_to_obj = 1;
+    static const byte i_put_int         = 2;
+    static const byte i_put_float       = 3;
 }
 
 #endif

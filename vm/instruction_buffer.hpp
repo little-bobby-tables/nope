@@ -9,24 +9,15 @@ namespace VM {
             ByteSequence to_byte_sequence() {
                 return buffer;
             }
-            void push(const unsigned char i) {
+            void push(const byte i) {
                 buffer.push_back(i);
                 instruction_count++;
             }
             void push(long int_value) {
-                /* FIXME: ugly & not portable (doesn't take endianness into account) */
-                /* gets the job done tho */
-                buffer.push_back(static_cast<int>(int_value & 0xFF));
-                buffer.push_back(static_cast<int>((int_value >> 8) & 0xFF));
-                buffer.push_back(static_cast<int>((int_value >> 16) & 0xFF));
-                buffer.push_back(static_cast<int>((int_value >> 24) & 0xFF));
-                buffer.push_back(static_cast<int>((int_value >> 32) & 0xFF));
-                buffer.push_back(static_cast<int>((int_value >> 40) & 0xFF));
-                buffer.push_back(static_cast<int>((int_value >> 48) & 0xFF));
-                buffer.push_back(static_cast<int>((int_value >> 56) & 0xFF));
+                pack_8byte_value(int_value);
             }
             void push(double float_value) {
-
+                pack_8byte_value(float_value);
             }
             void push(std::string string_value) {
                 const char* c = string_value.c_str();
@@ -39,6 +30,15 @@ namespace VM {
                 return instruction_count;
             }
         private:
+            template<typename T>
+            inline void pack_8byte_value(T v) {
+                union { T value; byte packed[8]; } _conversion;
+                _conversion.value = v;
+                for (int i = 0; i < 8; i++) {
+                    buffer.push_back(_conversion.packed[i]);
+                }
+            }
+
             ByteSequence buffer;
             size_t instruction_count = 0;
     };
