@@ -33,6 +33,7 @@ namespace VM {
                 while (*c) {
                     buffer.push_back(*c++);
                 };
+                buffer.push_back('\0');
             }
             size_t size() {
                 return instruction_count;

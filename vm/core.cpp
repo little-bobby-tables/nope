@@ -14,14 +14,17 @@ void Core::loop() {
                 break;
             case i_send_msg_to_obj: {
                     std::string method = iseq.get_str_value();
-                    if (method == "+") {
-                        long arg = value_to_int(val_stack.top()); val_stack.pop();
-                        long obj = value_to_int(val_stack.top()); val_stack.pop();
-                        std::cout << "=> " << obj << " + " << arg << " = " << arg + obj << std::endl;
-                    }
+                    long arg = value_to_int(val_stack.top()); val_stack.pop();
+                    long obj = value_to_int(val_stack.top()); val_stack.pop();
+
+                    if (method == "+") val_stack.push(int_to_value(obj + arg));
+                    if (method == "-") val_stack.push(int_to_value(obj - arg));
+                    if (method == "*") val_stack.push(int_to_value(obj * arg));
+                    if (method == "/") val_stack.push(int_to_value(obj / arg));
                 }
                 break;
         }
     }
+    std::cout << "=> " << value_to_int(val_stack.top()) << std::endl;
 }
 
