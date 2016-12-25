@@ -1,10 +1,8 @@
 #ifndef VM_DRIVER
 #define VM_DRIVER
 
-#include "../lang/ast.hpp"
 #include "ast_instruction_builder.h"
-#include "instruction_sequence.hpp"
-#include "core.h"
+#include "loop.h"
 
 namespace VM {
     class Driver {
@@ -13,8 +11,8 @@ namespace VM {
                 InstructionBuilderASTVisitor v = InstructionBuilderASTVisitor();
                 InstructionBuffer ins = v.ast_to_instructions(program);
                 InstructionSequence iseq = InstructionSequence(ins.to_byte_sequence());
-                Core exec_core = Core(iseq);
-                exec_core.loop();
+                Loop exec_loop = Loop(iseq);
+                exec_loop.run();
             }
     };
 }

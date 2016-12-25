@@ -2,7 +2,7 @@ CXX=g++
 DEBUG=-g
 CXXFLAGS=-g -std=c++14
 SRC=$(wildcard *.cpp)
-VM=vm/ast_instruction_builder.cpp vm/core.cpp
+VM=vm/ast_instruction_builder.cpp vm/loop.cpp
 OBJ_GENERATED=lang/parser.o lang/lexer.o
 OBJ=$(SRC:%.cpp=%.o) $(VM:%.cpp=%.o) $(OBJ_GENERATED)
 BIN=peridot

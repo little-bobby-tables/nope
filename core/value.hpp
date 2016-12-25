@@ -1,13 +1,11 @@
-#ifndef VM_CORE_DATA
-#define VM_CORE_DATA
+#ifndef CORE_VALUE
+#define CORE_VALUE
 
-#include <stack>
 #include <cstdint>
 
-namespace VM {
+namespace Core {
     typedef uintptr_t Value;
-    typedef std::stack<Value> ValueStack;
-    
+      
     /* Value is largely inspired by the current implementation of MRI (CRuby),
      * which itself was based on techniques employed in Lisp implementation,
      * where it is usually treated as a pointer to an object, but may hold a

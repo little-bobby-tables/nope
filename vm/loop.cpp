@@ -1,8 +1,9 @@
-#include "core.h"
+#include "loop.h"
 
 using namespace VM;
+using namespace Core;
 
-void Core::loop() {
+void Loop::run() {
     unsigned char i;
     while (i = iseq.next()) {
         switch (i) {
