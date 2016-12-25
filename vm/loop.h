@@ -1,6 +1,8 @@
 #ifndef VM_LOOP
 #define VM_LOOP
 
+#include <stack>
+
 #include "../core/data.hpp"
 #include "instruction_sequence.hpp"
 
@@ -12,7 +14,7 @@ namespace VM {
             }
             void run();
         private:
-            std::stack<Core::Value> val_stack;
+            std::stack<Core::Value> v_stack;
             InstructionSequence iseq;
     };
 }

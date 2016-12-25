@@ -34,11 +34,11 @@ namespace VM {
         private:
             template<typename T>
             inline T unpack_8byte_value() {
-                union { T value; byte packed[8]; } _conversion;
+                union { T value; byte packed[8]; } conversion;
                 for (int i = 0; i < sizeof(long); i++) {
-                    _conversion.packed[i] = seq[position++];
+                    conversion.packed[i] = seq[position++];
                 }
-                return _conversion.value;
+                return conversion.value;
             }
 
             size_t position = 0;
