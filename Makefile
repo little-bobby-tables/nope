@@ -1,10 +1,9 @@
 CXX=g++
 DEBUG=-g
 CXXFLAGS=-g -std=c++14
-SRC=$(wildcard *.cpp)
-VM=vm/ast_instruction_builder.cpp vm/loop.cpp
+SRC=$(wildcard *.cpp) $(wildcard vm/*.cpp) $(wildcard lib/*.cpp)
 OBJ_GENERATED=lang/parser.o lang/lexer.o
-OBJ=$(SRC:%.cpp=%.o) $(VM:%.cpp=%.o) $(OBJ_GENERATED)
+OBJ=$(SRC:%.cpp=%.o) $(OBJ_GENERATED)
 BIN=peridot
 
 GENERATED=lang/lexer.yy.cc lang/parser.tab.cc lang/parser.tab.hh lang/location.hh lang/position.hh lang/stack.hh lang/parser.output
@@ -26,6 +25,7 @@ lexer: lang/peridot.l
 clean:
 	 rm -f *.o
 	 rm -f vm/*.o
+	 rm -f lib/*.o
 	 rm -f lang/*.o
 	 rm -f $(GENERATED)
 	 rm -f $(BIN)

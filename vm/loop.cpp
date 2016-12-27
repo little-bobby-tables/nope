@@ -1,7 +1,5 @@
 #include "loop.h"
 
-#include "../core/oop.hpp"
-
 using namespace VM;
 using namespace Core;
 
@@ -17,20 +15,10 @@ void Loop::run() {
                 break;
             case i_send_msg_to_obj: {
                     std::string method = iseq.get_str_value();
-                    Value arg = v_stack.top(); v_stack.pop();
-                    Value obj = v_stack.top(); v_stack.pop();
-                    if (v_is_int(arg) && v_is_int(obj)) {
-                        if (method == "+") v_stack.push(v_from_int(v_to_int(obj) + v_to_int(arg)));
-                        if (method == "-") v_stack.push(v_from_int(v_to_int(obj) - v_to_int(arg)));
-                        if (method == "*") v_stack.push(v_from_int(v_to_int(obj) * v_to_int(arg)));
-                        if (method == "/") v_stack.push(v_from_int(v_to_int(obj) / v_to_int(arg)));
-                    }
-                    if (v_is_float(arg) && v_is_float(obj)) {
-                        if (method == "+") v_stack.push(v_from_float(v_to_float(obj) + v_to_float(arg)));
-                        if (method == "-") v_stack.push(v_from_float(v_to_float(obj) - v_to_float(arg)));
-                        if (method == "*") v_stack.push(v_from_float(v_to_float(obj) * v_to_float(arg)));
-                        if (method == "/") v_stack.push(v_from_float(v_to_float(obj) / v_to_float(arg)));
-                    }
+                    auto arg = v_stack.top(); v_stack.pop();
+                    auto obj = v_stack.top(); v_stack.pop();
+                    auto result = dispatcher->invoke_method(obj, method, arg);
+                    v_stack.push(result);
                 }
                 break;
         }
