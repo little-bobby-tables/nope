@@ -3,6 +3,7 @@
 
 #include "../lib/object.h"
 #include "../lib/integer.h"
+#include "../lib/float.h"
 #include "../vendor/sparsepp/sparsepp.h"
 
 using spp::sparse_hash_map;
@@ -18,6 +19,7 @@ namespace VM {
                 Class* object = classes["Object"].get();
 
                 classes["Integer"] = std::make_unique<Lib::Integer>(object);
+                classes["Float"] =   std::make_unique<Lib::Float>(object);
             };
             Value invoke_method(Value inst, std::string method) {
                 Class* c = get_class(inst);

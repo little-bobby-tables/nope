@@ -23,7 +23,7 @@ void Loop::run() {
                 break;
         }
     }
-    if (v_is_int(v_stack.top())) std::cout << "=> " << v_to_int(v_stack.top()) << std::endl;
-    if (v_is_float(v_stack.top())) std::cout << "=> " << v_to_float(v_stack.top()) << std::endl;
+    if (v_is_int(v_stack.top())) std::cout << "=> " << v_to_int(v_stack.top()) << " (Integer)" << std::endl;
+    if (v_is_float(v_stack.top())) std::cout << "=> " << v_to_float(v_stack.top()) << " (Float)" << std::endl;
 }
 
