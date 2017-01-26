@@ -89,15 +89,15 @@ namespace Lang {
 
     class AssignmentNode : public ExpressionNode {
         public:
-            ReferenceChainNode* left;
-            ExpressionNode* right;
+            std::string name;
+            ExpressionNode* value;
 
-            AssignmentNode(ReferenceChainNode* left, ExpressionNode* right) {
-                this->left = left;
-                this->right = right;
+            AssignmentNode(std::string name, ExpressionNode* value) {
+                this->name = name;
+                this->value = value;
             }
             ~AssignmentNode() {
-                delete this->left; delete this->right;
+                delete this->value;
             }
             void accept(ASTVisitor& v) { v.visit(this); }
     };

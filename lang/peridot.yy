@@ -57,6 +57,7 @@
 %type <Lang::ExpressionNode*>           expression
 %type <Lang::ReferenceChainNode*>       reference_chain
 %type <Lang::AssignmentNode*>           assignment
+%type <Lang::ReferenceNode*>            reference
 %type <Lang::FunctionDefinitionNode*>   function_definition
 %type <Lang::ParameterList>             function_parameters parameter_list
 %type <Lang::BlockNode*>                block
@@ -97,6 +98,7 @@ expression
     : LeftParenthesis expression RightParenthesis { $$ = $2; }
     | assignment                                  { $$ = $1; }
     | infix_op_expression                         { $$ = $1; }
+    | reference                                   { $$ = $1; }
     | reference_chain                             { $$ = $1; }
     | if_expression                               { $$ = $1; }
     | general_call                                { $$ = $1; }
@@ -109,8 +111,14 @@ expression
 */
 
 assignment
-    : reference_chain Assignment expression {
+    : Reference Assignment expression {
         $$ = new AssignmentNode($1, $3);
+    }
+    ;
+
+reference
+    : Reference {
+        $$ = new ReferenceNode($1);
     }
     ;
 
@@ -123,10 +131,6 @@ reference_chain
         $$ = new ReferenceChainNode();
         $$->append($1);
         $$->append(new ReferenceNode($3));           
-    }
-    | Reference {
-        $$ = new ReferenceChainNode();
-        $$->append(new ReferenceNode($1));
     }
     ;
 

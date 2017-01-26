@@ -47,8 +47,9 @@ namespace Core {
     /* 0 is not a valid pointer and evaluates to false in C++ */
     static const Value False = 0b0;
     /* Other constant values can be represented using the last bit: */
-    static const Value True = 0b1100;
-    static const Value Nothing = 0b10100;
+    static const Value True = 0b0100;
+    static const Value Nothing = 0b1100;
+    static const Value Undefined = 0b10100;
 }
 
 #endif

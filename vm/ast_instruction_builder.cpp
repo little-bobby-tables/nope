@@ -15,9 +15,20 @@ void VM::InstructionBuilderASTVisitor::visit(ExpressionListNode* node) {
     }
 }
 
-void VM::InstructionBuilderASTVisitor::visit(ReferenceNode* node) {}
+void VM::InstructionBuilderASTVisitor::visit(ReferenceNode* node) {
+    instructions.push(VM::i_put_reference);
+    instructions.push(node->reference);
+}
+
 void VM::InstructionBuilderASTVisitor::visit(ReferenceChainNode* node) {}
-void VM::InstructionBuilderASTVisitor::visit(AssignmentNode* node) {}
+
+void VM::InstructionBuilderASTVisitor::visit(AssignmentNode* node) {
+    /* Value is the first value popped off the stack, reference is the second */
+    node->value->accept(*this);
+    instructions.push(VM::i_assign_reference);
+    instructions.push(node->name);
+}
+
 void VM::InstructionBuilderASTVisitor::visit(FunctionDefinitionNode* node) {}
 void VM::InstructionBuilderASTVisitor::visit(GeneralCallNode* node) {}
 void VM::InstructionBuilderASTVisitor::visit(GeneralCallArgumentsNode* node) {}
